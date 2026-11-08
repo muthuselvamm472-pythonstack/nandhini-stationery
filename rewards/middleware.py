@@ -71,52 +71,59 @@ class SecurityAndBotShieldMiddleware:
         # -----------------------------------------------------------
         # 3. SHIELD: Sliding-Window IP Rate Limiting (DDoS & Brute-Force)
         # -----------------------------------------------------------
-        # 3A. IP Ban Check
+        is_staff_user = bool(
+            getattr(request, 'user', None)
+            and request.user.is_authenticated
+            and (request.user.is_staff or request.user.is_superuser)
+        )
+
+        # 3A. IP Ban Check (Always bypass for authenticated staff & loopback)
         ban_key = f"banned_ip_{client_ip}"
-        if cache.get(ban_key):
+        if not is_staff_user and client_ip not in ('127.0.0.1', '::1') and cache.get(ban_key):
             return render(request, 'rewards/error.html', {
                 'title': 'Traffic Paused',
                 'message': 'Excessive requests detected from your device. Access is temporarily paused for security. Please try again shortly.',
                 'code': 'ERR_RATE_LIMIT'
             }, status=429)
 
-        # 3B. Admin Route Brute-Force Shield (Max 10 requests per 5 minutes)
-        if any(path.startswith(ap) for ap in ADMIN_PATHS):
+        # 3B. Admin Login Brute-Force Shield (Only protects POST submissions, max 25 per 5 mins)
+        # Normal GET browsing / viewing admin pages is completely permitted
+        if not is_staff_user and request.method == 'POST' and any(path.startswith(ap) for ap in ADMIN_PATHS):
             admin_rate_key = f"admin_rate_{client_ip}"
             admin_hits = cache.get(admin_rate_key, 0)
-            if admin_hits > 10:
-                cache.set(ban_key, True, timeout=900)  # 15-minute jail for brute-force attempts
+            if admin_hits > 25:
+                cache.set(ban_key, True, timeout=180)  # Brief 3-minute cooldown
                 logger.warning(f"Admin brute force threshold exceeded for IP {client_ip}")
                 err_resp = render(request, 'rewards/error.html', {
                     'title': 'Admin Route Locked',
-                    'message': 'Excessive administrative requests from this address. Access is locked for 15 minutes for store security.',
+                    'message': 'Multiple login attempts detected. Access is briefly paused for 3 minutes for store security.',
                     'code': 'ERR_ADMIN_RATE_LIMIT'
                 }, status=429)
-                err_resp['Retry-After'] = '900'
+                err_resp['Retry-After'] = '180'
                 return err_resp
             cache.set(admin_rate_key, admin_hits + 1, timeout=300)
 
-        # 3C. Sensitive Auth & Claim Paths (Max 25 requests per minute)
-        if any(path.startswith(sp) for sp in SENSITIVE_PATHS):
+        # 3C. Sensitive Auth & Claim Paths (Max 50 requests per minute)
+        if not is_staff_user and any(path.startswith(sp) for sp in SENSITIVE_PATHS):
             auth_rate_key = f"auth_rate_{client_ip}"
             auth_hits = cache.get(auth_rate_key, 0)
-            if auth_hits > 25:
-                cache.set(ban_key, True, timeout=300)  # 5-minute cooldown
+            if auth_hits > 50:
+                cache.set(ban_key, True, timeout=180)  # 3-minute cooldown
                 logger.warning(f"Rate limit exceeded on auth/claim for IP {client_ip}")
                 return render(request, 'rewards/error.html', {
                     'title': 'Too Many Attempts',
-                    'message': 'Too many scan or login attempts from this network. Please wait 5 minutes before trying again.',
+                    'message': 'Too many scan or login attempts from this network. Please wait 3 minutes before trying again.',
                     'code': 'ERR_AUTH_RATE_LIMIT'
                 }, status=429)
             cache.set(auth_rate_key, auth_hits + 1, timeout=60)
 
-        # 3C. Global Request Limiting (Exclude background polling endpoints)
+        # 3D. Global Request Limiting (Exclude background polling endpoints & staff)
         is_background_poll = path.startswith('/api/latest-broadcast/') or path.startswith('/sw.js') or path.startswith('/static/')
-        if not is_background_poll:
+        if not is_staff_user and not is_background_poll:
             global_rate_key = f"global_rate_{client_ip}"
             global_hits = cache.get(global_rate_key, 0)
             # Higher limit for localhost/loopback testing
-            max_global = 600 if client_ip in ('127.0.0.1', '::1') else 200
+            max_global = 1000 if client_ip in ('127.0.0.1', '::1') else 400
             if global_hits > max_global:
                 if client_ip not in ('127.0.0.1', '::1'):
                     cache.set(ban_key, True, timeout=120)  # 2-minute cooldown
