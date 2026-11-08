@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: nandhini-stationery
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn nandhini_stationery.wsgi:application --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: "nandhini-stationery.onrender.com,*.onrender.com,127.0.0.1,localhost"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://nandhini-stationery.onrender.com,https://*.onrender.com"
+      - key: PYTHON_VERSION
+        value: "3.12.8"
