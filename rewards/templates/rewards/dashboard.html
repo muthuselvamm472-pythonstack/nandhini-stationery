@@ -1,0 +1,1304 @@
+{% extends 'rewards/base.html' %}
+{% block content %}
+<!-- HTML5 QR Code Scanner & jsQR Libraries -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+<!-- CELEBRATORY SLIDE-DOWN TOAST MODAL (Real-time Broadcaster) -->
+<div id="broadcastToastModal"
+     class="hidden fixed top-3 sm:top-4 inset-x-0 z-50 flex justify-center px-4 transition-all duration-300 transform -translate-y-36 opacity-0"
+     style="pointer-events: none !important;">
+    <div id="broadcastToastCard"
+         class="bg-slate-900/95 dark:bg-slate-950/95 text-white border-2 border-purple-500/70 rounded-3xl p-4 sm:p-5 shadow-2xl backdrop-blur-xl max-w-md w-full flex items-start gap-3.5 shadow-purple-950/50"
+         style="pointer-events: auto !important;">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-2xl shrink-0 shadow-md">
+            🎁
+        </div>
+        <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-2">
+                <span class="text-[9px] font-bold uppercase tracking-widest text-amber-300 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-full">
+                    New Offer Alert
+                </span>
+                <button type="button"
+                        id="toastCloseBtn"
+                        onclick="dismissToastModal()"
+                        class="shrink-0 w-8 h-8 rounded-full bg-white/15 hover:bg-white/30 active:scale-90 text-white flex items-center justify-center transition-all cursor-pointer border border-white/20 focus:outline-none"
+                        title="Dismiss alert"
+                        aria-label="Close modal">
+                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <h4 id="toastTitle" class="font-headline text-sm sm:text-base font-bold text-white mt-1 leading-tight"></h4>
+            <p id="toastMessage" class="text-xs text-slate-300 mt-1 leading-relaxed"></p>
+            <div class="mt-2.5 flex items-center justify-end">
+                <button onclick="dismissToastModal()" class="btn-tap px-3 py-1 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-display text-xs font-bold transition shadow-xs cursor-pointer">
+                    Got It! 👍
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PERSISTENT ANNOUNCEMENT BANNER (High-Contrast Solid Luxury Alert) -->
+<div id="persistentBroadcastBanner"
+     data-version="{% if active_broadcast %}{{ active_broadcast.id }}_{{ active_broadcast.updated_at|date:'U' }}{% endif %}"
+     class="{% if not active_broadcast %}hidden{% endif %} relative z-20 overflow-hidden rounded-2xl text-white p-3.5 sm:p-4 mb-4 border-2 border-purple-400/40 shadow-xl transition-all"
+     style="background: linear-gradient(135deg, #2D0B5A 0%, #1E1B4B 50%, #2A0845 100%) !important;">
+    <div class="flex items-start justify-between gap-3">
+        <div class="flex items-start gap-2.5 min-w-0 flex-1">
+            <span class="text-xl sm:text-2xl shrink-0 mt-0.5">📢</span>
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-400/25 text-purple-200 border border-purple-300/40 px-2 py-0.5 rounded-full">
+                        Store Announcement
+                    </span>
+                    <span class="text-[10px] text-purple-200/90 font-mono font-medium" id="bannerTimestamp">
+                        {% if active_broadcast %}{{ active_broadcast.created_at|date:"d M, g:i A" }}{% endif %}
+                    </span>
+                </div>
+                <h3 class="font-headline text-xs sm:text-sm font-bold text-white mt-1 leading-snug tracking-tight" id="bannerTitle">
+                    {% if active_broadcast %}{{ active_broadcast.title }}{% endif %}
+                </h3>
+                <p class="text-[11px] sm:text-xs text-purple-100/90 mt-0.5 leading-relaxed" id="bannerMessage">
+                    {% if active_broadcast %}{{ active_broadcast.message }}{% endif %}
+                </p>
+            </div>
+        </div>
+        <button type="button"
+                id="bannerCloseBtn"
+                onclick="dismissPersistentBanner()"
+                class="shrink-0 w-8 h-8 rounded-full bg-white/20 hover:bg-white/35 active:scale-90 text-white flex items-center justify-center transition-all cursor-pointer border-2 border-white/40 shadow-md focus:outline-none -mr-0.5 -mt-0.5 relative z-30"
+                title="Dismiss announcement"
+                aria-label="Close announcement">
+            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+</div>
+
+{% if welcome_bonus_awarded %}
+<!-- FIRST-TIME REGISTRATION WELCOME BONUS CELEBRATION BANNER -->
+<div id="welcomeBonusCelebration" class="relative z-30 mb-4 p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-white shadow-xl border-2 border-amber-300/80 overflow-hidden">
+    <div class="flex items-start sm:items-center justify-between gap-3 relative z-10">
+        <div class="flex items-start sm:items-center gap-3 min-w-0">
+            <span class="text-3xl sm:text-4xl shrink-0">🎁</span>
+            <div class="min-w-0">
+                <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded-full inline-block leading-normal">
+                    New Member Welcome Gift
+                </span>
+                <h3 class="font-headline text-base sm:text-xl font-bold leading-tight mt-1">
+                    +{{ welcome_bonus_awarded }} Free Welcome Points Added to Your Balance!
+                </h3>
+                <p class="text-xs text-amber-100 font-medium mt-0.5 leading-relaxed">
+                    Welcome to Nandhini Stationery, {{ customer.name }}! Your first gift milestone is already closer. Scan purchase chits after shopping to unlock free gifts!
+                </p>
+            </div>
+        </div>
+        <button onclick="document.getElementById('welcomeBonusCelebration').remove()"
+                class="shrink-0 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold flex items-center justify-center text-sm cursor-pointer border border-white/30 transition"
+                title="Dismiss">
+            ✕
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<!-- OFFLINE SCAN NOTIFICATION BANNER -->
+<div id="offlineSyncBanner" class="hidden relative z-20 overflow-hidden rounded-2xl bg-amber-50 dark:bg-amber-950/70 text-amber-950 dark:text-amber-100 p-3.5 sm:p-4 mb-4 border-2 border-amber-400 dark:border-amber-600 shadow-md">
+    <div class="flex items-start justify-between gap-3">
+        <div class="flex items-start gap-2.5">
+            <span class="text-xl shrink-0">📶</span>
+            <div>
+                <h4 class="font-display text-xs sm:text-sm font-bold uppercase tracking-wider text-amber-900 dark:text-amber-200">
+                    Offline - Chit Saved Securely!
+                </h4>
+                <p class="text-xs text-amber-800 dark:text-amber-300 mt-0.5 leading-relaxed font-medium">
+                    Your internet connection is currently down. Your scanned chit is safely cached on this phone and will automatically claim your points the moment you reconnect!
+                </p>
+            </div>
+        </div>
+        <button onclick="document.getElementById('offlineSyncBanner').classList.add('hidden')"
+                class="shrink-0 w-7 h-7 rounded-full bg-amber-200/60 dark:bg-amber-800/60 text-amber-900 dark:text-amber-200 font-bold flex items-center justify-center text-xs cursor-pointer">
+            ✕
+        </button>
+    </div>
+</div>
+
+<!-- AUTO-RECONNECT TOAST -->
+<div id="onlineSyncToast" class="hidden fixed top-4 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
+    <div class="bg-emerald-600 text-white rounded-2xl py-2.5 px-4 shadow-xl border border-emerald-400 text-xs font-bold flex items-center gap-2">
+        <span class="text-base animate-spin">🔄</span>
+        <span>Reconnected! Syncing your saved chit points...</span>
+    </div>
+</div>
+
+<!-- Native Notification Permission Bar (Compact 1-Click Activation) -->
+<div id="pushPromptBar" class="hidden mb-3 p-2.5 sm:p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700/80 flex items-center justify-between gap-2.5 shadow-2xs">
+    <div class="flex items-center gap-2 min-w-0">
+        <span class="text-lg shrink-0">🔔</span>
+        <p class="text-xs text-amber-900 dark:text-amber-200 font-bold truncate">
+            Enable instant alerts for free gift unlocks & bonus points!
+        </p>
+    </div>
+    <button onclick="requestNotificationPermission()" class="btn-tap px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white font-display text-[11px] font-bold rounded-xl shadow-xs transition shrink-0 cursor-pointer">
+        Allow Alerts
+    </button>
+</div>
+
+<!-- 1. MINIMAL & ELEGANT LUXURY LOYALTY MEMBER PASS (Totally Different Executive VIP Design) -->
+<div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0B132B] via-[#0F172A] to-[#1E293B] text-white p-4 sm:p-6 shadow-xl border border-slate-700/80 mb-6">
+    <!-- Ambient luxury aura -->
+    <div class="absolute -top-16 -right-16 w-52 h-52 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-16 -left-16 w-52 h-52 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Top Identity Row: Store Identity & Member Details -->
+    <div class="relative z-10 flex items-start justify-between gap-2">
+        <div class="min-w-0">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/10 border border-amber-400/25 text-amber-300 font-display text-[9px] sm:text-[10px] font-bold uppercase tracking-widest leading-none">
+                <span class="text-amber-400">★</span>
+                <span>Loyalty Certificate</span>
+            </div>
+            <h2 class="font-headline text-2xl sm:text-3xl font-bold text-white mt-1.5 tracking-tight leading-tight truncate">
+                {{ customer.name }}
+            </h2>
+            <p class="font-mono text-xs text-slate-400 font-medium mt-0.5 tabular-nums tracking-wide">
+                +91 {{ customer.phone_number }}
+            </p>
+        </div>
+        <div class="bg-white/10 border border-white/10 text-amber-300 font-number text-xs font-bold px-2.5 py-1 rounded-xl shadow-xs flex items-center gap-1.5 shrink-0">
+            <span>⭐</span>
+            <span>{{ customer.total_visits }} {% if customer.total_visits == 1 %}Visit{% else %}Visits{% endif %}</span>
+        </div>
+    </div>
+
+    <!-- Available Balance & Scan Action Bar (Spacious, Minimal & Never Crowded) -->
+    <div class="relative z-10 my-4 sm:my-5 p-3.5 sm:p-4 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-between gap-3 shadow-inner">
+        <div class="min-w-0">
+            <p class="font-display text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 leading-none">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                </span>
+                <span>Available Balance</span>
+            </p>
+            <div class="flex items-baseline gap-1.5 sm:gap-2 mt-1.5">
+                <span class="font-number text-3xl sm:text-5xl font-black text-white tabular-nums leading-none tracking-tight">
+                    {{ customer.total_points }}
+                </span>
+                <span class="font-display text-xs sm:text-sm font-bold text-amber-400 uppercase tracking-wider">
+                    Points
+                </span>
+            </div>
+        </div>
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <button onclick="openMemberPassModal()"
+                    class="btn-tap bg-white/15 hover:bg-white/25 active:scale-95 text-white font-display text-xs font-bold px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-white/25 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    title="Show Member QR / Barcode at counter">
+                <span class="text-sm leading-none">💳</span>
+                <span class="leading-none whitespace-nowrap">Pass</span>
+            </button>
+            <button onclick="openQRScannerModal()"
+                    class="btn-tap bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 active:scale-95 text-white font-display text-xs font-bold px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 border border-amber-300/30 cursor-pointer">
+                <span class="text-sm leading-none">📷</span>
+                <span class="leading-none whitespace-nowrap">Scan</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Milestone Goal & Elegant Continuous Progress Bar -->
+    <div class="relative z-10 space-y-3">
+        <!-- Next Goal Header (Never Truncates!) -->
+        <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-base shrink-0">{{ next_reward.icon }}</span>
+                    <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400">Next Milestone Goal</span>
+                </div>
+                <p class="font-display text-xs sm:text-sm font-bold text-white leading-snug mt-0.5 break-words">
+                    {{ next_reward.name }}
+                </p>
+            </div>
+            <div class="text-right shrink-0">
+                <span class="font-number text-xs font-bold text-amber-300 bg-amber-400/10 border border-amber-400/20 px-2.5 py-1 rounded-xl whitespace-nowrap shadow-2xs block">
+                    {{ customer.total_points }} / {{ next_reward.points }} Pts
+                </span>
+            </div>
+        </div>
+
+        <!-- Sleek Dynamic Synchronized Milestone Progress Tracks (1-to-1 Segment Aligned with All Configured Gifts) -->
+        <div class="flex items-center gap-1.5 w-full">
+            {% for m in milestones %}
+            <div class="flex-1 bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700/60 shadow-inner">
+                <div class="{% if m.segment_pct >= 100 %}bg-gradient-to-r from-emerald-500 to-emerald-400{% else %}bg-gradient-to-r from-amber-400 to-amber-500 shadow-xs shadow-amber-400/30{% endif %} h-full rounded-full transition-all duration-700 milestone-track-fill"
+                     data-pct="{{ m.segment_pct }}"></div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Dynamic Milestone Grid (Mathematically Aligned for all mobile screens: iPhone SE, iPhone 16, Pixel 9, Galaxy A55) -->
+        <div id="milestoneBadgesGrid"
+             data-cols="{{ milestones|length }}"
+             class="grid gap-1.5 text-center {% if milestones|length == 1 %}grid-cols-1{% elif milestones|length == 2 %}grid-cols-2{% elif milestones|length == 3 %}grid-cols-3{% elif milestones|length == 5 %}grid-cols-5{% elif milestones|length >= 6 %}grid-cols-6{% else %}grid-cols-4{% endif %}">
+            {% for m in milestones %}
+            <div class="py-1.5 px-0.5 sm:px-1 rounded-xl border flex items-center justify-center gap-1 text-[9px] sm:text-xs font-bold tabular-nums transition
+                {% if customer.total_points >= m.points %}
+                    bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-xs
+                {% elif next_reward.points == m.points %}
+                    bg-amber-400/20 text-amber-300 border-amber-400/40 ring-1 ring-amber-400/30 font-extrabold
+                {% else %}
+                    bg-white/5 text-slate-400 border-white/10
+                {% endif %}">
+                <span class="text-xs">{% if customer.total_points >= m.points %}✓{% elif next_reward.points == m.points %}🎯{% else %}{{ m.icon }}{% endif %}</span>
+                <span class="truncate">{{ m.points }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <script>
+            (function() {
+                var fills = document.querySelectorAll('.milestone-track-fill');
+                for (var i = 0; i < fills.length; i++) {
+                    var pct = fills[i].getAttribute('data-pct') || '0';
+                    fills[i].style.width = pct + '%';
+                }
+                var grid = document.getElementById('milestoneBadgesGrid');
+                if (grid) {
+                    var count = grid.getAttribute('data-cols') || '4';
+                    grid.style.gridTemplateColumns = 'repeat(' + count + ', minmax(0, 1fr))';
+                }
+            })();
+        </script>
+
+        <!-- Dynamic Unlock Notice -->
+        <div class="text-center text-[11px] sm:text-xs text-slate-300 pt-1 font-medium border-t border-white/10 flex items-center justify-center gap-1.5">
+            {% if points_needed > 0 %}
+                <span>Needs <strong class="text-amber-300 font-bold">{{ points_needed }} more pts</strong> to unlock {{ next_reward.name }}</span>
+            {% else %}
+                <span class="text-emerald-400 font-bold">🎉 Reward ready to claim at the counter!</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- 1-Click WhatsApp Share Card (Share with Classmates) -->
+<div class="mb-6 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/5 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between gap-3 shadow-xs">
+    <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-sm">
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+        </div>
+        <div class="min-w-0">
+            <h4 class="font-headline text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight">Share with Classmates</h4>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">Tell friends to collect points on their stationery purchases!</p>
+        </div>
+    </div>
+    <a href="{{ whatsapp_share_url }}"
+       target="_blank" rel="noopener noreferrer"
+       class="btn-tap px-3.5 py-2 bg-[#25D366] hover:bg-[#20BA5A] text-white font-display text-xs font-bold rounded-xl shadow-xs transition shrink-0 inline-flex items-center gap-1.5 active:scale-95 cursor-pointer">
+        <span>Share</span>
+        <span>→</span>
+    </a>
+</div>
+
+<!-- 2. REWARD SLIP TIERS: DYNAMIC NORMAL TO ULTRA-PREMIUM LADDER -->
+<div class="mb-6">
+    <div class="flex items-baseline justify-between mb-3">
+        <div>
+            <h3 class="font-headline text-2xl font-bold text-[#0F172A] dark:text-white">Purchase Slips & Points</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Collect one color-coded paper chit with each day's purchase</p>
+        </div>
+        <span class="font-display text-xs font-bold text-[#92400E] dark:text-amber-300 bg-[#FEF3C7] dark:bg-amber-950/60 border border-[#FDE68A] dark:border-amber-800 px-2.5 py-0.5 rounded-full shrink-0">
+            {{ tiers|length }} Tiers
+        </span>
+    </div>
+
+    <!-- Sleek, Dynamic Normal-to-Premium Reward Slip Ladder -->
+    <div class="space-y-2.5 sm:space-y-3">
+        {% for t in tiers %}
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-300 dark:hover:border-amber-700 rounded-2xl p-3 sm:p-3.5 flex items-center justify-between gap-2.5 sm:gap-3 shadow-xs hover:shadow-sm transition min-h-[72px]">
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                <div class="w-[66px] sm:w-[72px] min-w-[66px] sm:min-w-[72px] h-11 sm:h-12 px-1 py-1 rounded-xl bg-white dark:bg-slate-800 border-2
+                    {% if t.tier_key == '50' %}border-rose-400
+                    {% elif t.tier_key == '100' %}border-sky-500
+                    {% elif t.tier_key == '500' %}border-purple-500
+                    {% else %}border-emerald-600{% endif %} flex flex-col items-center justify-center shrink-0 shadow-2xs text-center">
+                    <span class="font-display text-[8px] sm:text-[9px] font-bold uppercase tracking-wider leading-none
+                        {% if t.tier_key == '50' %}text-rose-600 dark:text-rose-400
+                        {% elif t.tier_key == '100' %}text-sky-600 dark:text-sky-400
+                        {% elif t.tier_key == '500' %}text-purple-700 dark:text-purple-400
+                        {% else %}text-emerald-700 dark:text-emerald-400{% endif %}">Bill</span>
+                    <span class="font-number text-[11px] sm:text-xs font-black leading-tight tabular-nums mt-0.5 whitespace-nowrap text-center tracking-tight
+                        {% if t.tier_key == '50' %}text-rose-950 dark:text-rose-200
+                        {% elif t.tier_key == '100' %}text-sky-950 dark:text-sky-200
+                        {% elif t.tier_key == '500' %}text-purple-950 dark:text-purple-200
+                        {% else %}text-emerald-950 dark:text-emerald-200{% endif %}">₹{{ t.min_spend }}+</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="font-display text-xs font-bold px-1.5 py-0.5 rounded-md leading-none whitespace-nowrap
+                            {% if t.tier_key == '50' %}text-rose-800 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800
+                            {% elif t.tier_key == '100' %}text-sky-900 dark:text-sky-300 bg-sky-100/80 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-800
+                            {% elif t.tier_key == '500' %}text-purple-900 dark:text-purple-300 bg-purple-100/80 dark:bg-purple-950/60 border border-purple-300 dark:border-purple-800
+                            {% else %}text-emerald-900 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800{% endif %}">
+                            {{ t.chit_name }}
+                        </span>
+                        {% if t.badge_label %}
+                        <span class="font-display text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none whitespace-nowrap
+                            {% if t.tier_key == '50' %}bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700
+                            {% elif t.tier_key == '100' %}bg-sky-600 text-white shadow-2xs
+                            {% elif t.tier_key == '500' %}bg-purple-600 text-white shadow-2xs
+                            {% else %}bg-emerald-600 text-white shadow-xs{% endif %}">
+                            {{ t.badge_label }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 mt-1 leading-snug break-words">{{ t.subtitle }}</p>
+                </div>
+            </div>
+            <div class="text-right shrink-0 min-w-[62px] sm:min-w-[76px] pl-1">
+                <span class="font-number text-xl sm:text-2xl font-black tabular-nums block leading-none
+                    {% if t.tier_key == '50' %}text-slate-800 dark:text-slate-100
+                    {% elif t.tier_key == '100' %}text-sky-700 dark:text-sky-400
+                    {% elif t.tier_key == '500' %}text-purple-800 dark:text-purple-400
+                    {% else %}text-emerald-700 dark:text-emerald-400{% endif %}">+{{ t.points }}</span>
+                <span class="font-display text-[8px] sm:text-[9px] font-bold uppercase tracking-wider block mt-0.5
+                    {% if t.tier_key == '50' %}text-slate-400
+                    {% elif t.tier_key == '100' %}text-sky-600 dark:text-sky-400/80
+                    {% elif t.tier_key == '500' %}text-purple-700 dark:text-purple-400/80
+                    {% else %}text-emerald-800 dark:text-emerald-400/80{% endif %}">POINTS</span>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-xs text-slate-400 text-center py-3">No tiers configured.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 3. FREE REWARD MILESTONES (Clean Light Gift Catalog) -->
+<div class="mb-6">
+    <div class="flex items-baseline justify-between mb-3">
+        <h3 class="font-headline text-2xl font-bold text-[#0F172A] dark:text-white">Available Free Gifts</h3>
+        <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Redeem at counter</span>
+    </div>
+
+    <div class="space-y-3">
+        {% for item in rewards %}
+        <div class="rounded-2xl p-3.5 sm:p-4 border transition-all {% if customer.total_points >= item.points %}bg-[#F0FDF4] dark:bg-emerald-950/30 border-2 border-[#86EFAC] dark:border-emerald-700/60 shadow-sm{% elif item.points == next_reward.points %}bg-white dark:bg-slate-900 border-2 border-[#D97706] shadow-md{% else %}bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm{% endif %}">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl shrink-0 flex items-center justify-center text-xl {% if customer.total_points >= item.points %}bg-[#DCFCE7] dark:bg-emerald-900/60{% elif item.points == next_reward.points %}bg-[#FEF3C7] dark:bg-amber-950/60{% else %}bg-slate-50 dark:bg-slate-800{% endif %} border border-slate-200 dark:border-slate-700">
+                    {{ item.icon }}
+                </div>
+                <div class="flex-grow min-w-0">
+                    <div class="flex items-center flex-wrap gap-1.5">
+                        <h4 class="font-display text-sm font-bold text-[#0F172A] dark:text-white leading-snug break-words">{{ item.name }}</h4>
+                        {% if item.points == next_reward.points and customer.total_points < item.points %}
+                        <span class="bg-[#D97706] text-white font-display text-[9px] font-extrabold px-1.5 py-0.5 rounded-md uppercase tracking-wider shrink-0 leading-none">
+                            TARGET
+                        </span>
+                        {% endif %}
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium leading-snug break-words">{{ item.desc }}</p>
+                </div>
+
+                <div class="text-right shrink-0">
+                    {% if customer.total_points >= item.points %}
+                        <span class="inline-block bg-[#15803D] text-white font-display text-xs font-bold px-2.5 py-1 rounded-xl shadow-sm whitespace-nowrap">
+                            Ready ✓
+                        </span>
+                    {% else %}
+                        <span class="inline-block bg-slate-100 dark:bg-slate-800 text-[#0F172A] dark:text-slate-200 font-number text-xs font-bold px-2.5 py-1 rounded-xl tabular-nums border border-slate-200 dark:border-slate-700 whitespace-nowrap">
+                            {{ item.points }} Pts
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 4. RECENT CLAIMED GIFTS (Products Handed Over at Counter) -->
+{% if recent_redemptions %}
+<div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm mb-6">
+    <div class="flex items-center justify-between mb-3">
+        <h3 class="font-headline text-lg font-bold text-[#0F172A] dark:text-white flex items-center gap-2">
+            <span>🎁 Recently Claimed Gifts</span>
+        </h3>
+        <span class="text-xs font-bold text-amber-900 dark:text-amber-300 bg-[#FEF3C7] dark:bg-amber-950/60 border border-[#FDE68A] dark:border-amber-800 px-2.5 py-0.5 rounded-full">
+            {{ recent_redemptions|length }} Claimed
+        </span>
+    </div>
+    <div class="divide-y divide-slate-100 dark:divide-slate-800">
+        {% for r in recent_redemptions %}
+        <div class="py-2.5 flex items-center justify-between text-xs gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-lg shrink-0">
+                    🎁
+                </div>
+                <div class="min-w-0">
+                    <span class="font-display text-xs sm:text-sm font-bold text-[#0F172A] dark:text-white break-words leading-snug block">{{ r.reward_name }}</span>
+                    <span class="block text-[11px] text-slate-400 dark:text-slate-500 tabular-nums font-mono">{{ r.redeemed_at|date:"d M Y, h:i A" }}</span>
+                </div>
+            </div>
+            <div class="text-right shrink-0">
+                <span class="font-number text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-2 py-0.5 rounded-md tabular-nums border border-rose-200 dark:border-rose-800 block">
+                    -{{ r.points_spent }} Pts
+                </span>
+                <span class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold block mt-0.5">Handed Over ✓</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- 5. RECENT SCAN ACTIVITY (if any) -->
+{% if recent_scans %}
+<div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm mb-6">
+    <h3 class="font-headline text-lg font-bold text-[#0F172A] dark:text-white mb-3">Recent Scanned Chits</h3>
+    <div class="divide-y divide-slate-100 dark:divide-slate-800">
+        {% for scan in recent_scans %}
+        <div class="py-2.5 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full 
+                    {% if scan.tier == '50' %}bg-[#BE185D]
+                    {% elif scan.tier == '100' %}bg-[#0284C7]
+                    {% elif scan.tier == '500' %}bg-[#7E22CE]
+                    {% elif scan.tier == '1000' %}bg-[#B45309]
+                    {% else %}bg-slate-400{% endif %}"></span>
+                <div>
+                    <span class="font-display text-sm font-bold text-[#0F172A] dark:text-white">Tier ₹{{ scan.tier }}+ Chit</span>
+                    <span class="block text-[11px] text-slate-400 dark:text-slate-500 tabular-nums font-mono">{{ scan.claimed_at|date:"d M Y, h:i A" }}</span>
+                </div>
+            </div>
+            <span class="font-number text-sm font-bold text-[#15803D] dark:text-emerald-400 bg-[#F0FDF4] dark:bg-emerald-950/50 px-2.5 py-1 rounded-lg tabular-nums border border-[#BBF7D0] dark:border-emerald-800">
+                +{{ scan.points_awarded }} Pts
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- 5. STORE LOCATION & VISITING HOURS -->
+<div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm mb-6">
+    {% if founder_settings.founder_map_enabled %}
+    <!-- Founder's Heritage & Quality Guarantee Seal -->
+    <div class="mb-4 p-3.5 sm:p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/90 dark:border-amber-800/60 shadow-2xs">
+        <div class="flex items-center gap-3.5 sm:gap-4">
+            <!-- Cameo Minted Gold Portrait Medallion (Clean, Perfectly Centered) -->
+            <button type="button" onclick="openFounderModal()"
+                    class="btn-tap relative shrink-0 cursor-pointer focus:outline-none group self-center rounded-full"
+                    title="👑 Tap to view Founder's Tribute">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full p-[2.5px] bg-gradient-to-tr from-amber-500 via-amber-300 to-yellow-500 shadow-sm ring-2 ring-amber-400/30 group-hover:scale-105 transition-all flex items-center justify-center">
+                    <img src="{{ founder_settings.founder_photo_url }}"
+                         alt="Founder - Nandhini Stationery"
+                         class="w-full h-full rounded-full object-cover object-[50%_20%] bg-slate-800 aspect-square block border border-white/60 dark:border-slate-800">
+                </div>
+            </button>
+
+            <!-- Text Content: Clean header with Crown Emoji in card + Full unclipped quote -->
+            <div class="min-w-0 flex-1 flex flex-col justify-center">
+                <div class="flex items-center justify-between gap-1.5 flex-wrap">
+                    <h4 class="font-display text-xs sm:text-[13px] font-bold text-[#0F172A] dark:text-white leading-tight">
+                        👑 {{ founder_settings.founder_title }}
+                    </h4>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 shrink-0 leading-none">
+                        Verified ✓
+                    </span>
+                </div>
+                <p class="text-[11px] sm:text-xs text-amber-950 dark:text-amber-200/90 mt-1 leading-relaxed font-serif italic break-words">
+                    “{{ founder_settings.founder_motto }}”
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="flex items-start justify-between gap-2.5 mb-3">
+        <div class="min-w-0">
+            <h4 class="font-headline text-base sm:text-lg font-bold text-[#0F172A] dark:text-white leading-tight">
+                Nandhini Stationery
+                <span class="block text-xs font-tamil-serif text-slate-600 dark:text-amber-400 font-semibold mt-0.5">நந்தினி ஸ்டேஷனரி</span>
+            </h4>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Pallavaram • Pammal • Anakaputhur, Chennai • Open 8:00 AM – 10:00 PM</p>
+        </div>
+        <a href="https://maps.app.goo.gl/NNbn98PLgGt35uXM9" target="_blank" rel="noopener noreferrer"
+           class="shrink-0 font-display text-xs font-bold text-[#92400E] dark:text-amber-300 bg-[#FFFBEB] dark:bg-amber-950/60 hover:bg-[#FEF3C7] dark:hover:bg-amber-900/60 px-3 py-1.5 rounded-xl border border-[#FDE68A] dark:border-amber-800 transition flex items-center gap-1 shadow-sm">
+            <span>Directions</span>
+            <span>↗</span>
+        </a>
+    </div>
+    <div class="rounded-xl overflow-hidden border border-slate-200">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d14822.727102286644!2d80.143546!3d12.976430000000002!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a525e2d3831da53%3A0x72bfcf4e86172232!2sNandhini%20Stationery!5e1!3m2!1sen!2sin!4v1792607913086!5m2!1sen!2sin"
+                width="100%" height="180" style="border:0;" allowfullscreen="" loading="lazy"
+                referrerpolicy="strict-origin-when-cross-origin" title="Nandhini Stationery Location"></iframe>
+    </div>
+</div>
+
+<!-- 6. HIGH-CONVERTING CALL-TO-ACTION FLOATING BUTTON (Compact Mobile-Optimized Floating Pill) -->
+<div class="fixed bottom-4 inset-x-0 z-40 flex justify-center pointer-events-none px-4">
+    <button onclick="openQRScannerModal()"
+            class="pointer-events-auto btn-tap inline-flex items-center gap-2 bg-gradient-to-r from-[#D97706] to-[#EA580C] hover:from-[#B45309] hover:to-[#C2410C] text-white font-display text-xs sm:text-sm font-bold py-2.5 px-5 rounded-full shadow-lg shadow-amber-950/25 border border-amber-300/40 cursor-pointer">
+        <span class="text-base">📷</span>
+        <span>Scan Paper QR Chit</span>
+    </button>
+</div>
+
+<!-- 6.5. 💳 DIGITAL MEMBER COUNTER PASS MODAL (100% FREE LOCAL QR & BARCODE) -->
+<div id="memberPassModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 transition-all" onclick="handleMemberPassBackdrop(event)">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-sm w-full p-5 sm:p-6 shadow-2xl border-2 border-amber-400/60 dark:border-amber-500/40 text-center relative overflow-hidden" onclick="event.stopPropagation()">
+        <!-- Ambient Gold Aura -->
+        <div class="absolute -top-12 -right-12 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl pointer-events-none"></div>
+
+        <!-- Top Header & Close Button -->
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div class="flex items-center gap-2 text-left">
+                <span class="text-xl">👑</span>
+                <div>
+                    <h3 class="font-headline text-base font-bold text-[#0F172A] dark:text-white leading-tight">Member Counter Pass</h3>
+                    <p class="text-[10px] text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider">Nandhini Stationery</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeMemberPassModal()"
+                    class="btn-tap w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold flex items-center justify-center cursor-pointer transition text-sm">
+                ✕
+            </button>
+        </div>
+
+        <!-- Customer Identity & Points Pill -->
+        <div class="mb-3.5">
+            <h4 class="font-headline text-xl font-bold text-[#0F172A] dark:text-white tracking-tight">{{ customer.name }}</h4>
+            <div class="flex items-center justify-center gap-2 mt-1.5 flex-wrap">
+                <span class="font-mono text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                    NS-{{ customer.phone_number }}
+                </span>
+                <span class="font-number text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2.5 py-0.5 rounded-lg tabular-nums">
+                    {{ customer.total_points }} Points ⭐
+                </span>
+            </div>
+        </div>
+
+        <!-- QR Code Container (High-Contrast White Frame for Camera Scanning - Guaranteed in Dark Mode) -->
+        <div class="qr-barcode-exempt p-3.5 rounded-2xl border-2 border-amber-300 shadow-md inline-block mx-auto mb-2.5" style="background-color: #FFFFFF !important; background: #FFFFFF !important;">
+            <img src="/api/member-pass-qr/?phone={{ customer.phone_number }}"
+                 alt="Member Counter QR Code"
+                 class="w-44 h-44 sm:w-48 sm:h-48 mx-auto object-contain block"
+                 style="background-color: #FFFFFF !important; background: #FFFFFF !important;"
+                 loading="eager">
+        </div>
+
+        <!-- 1D Retail Barcode Container (Code 128 for Cash Counter Laser Scanners - Guaranteed Pure White) -->
+        <div class="qr-barcode-exempt p-2 rounded-xl border border-slate-200 mb-3 overflow-hidden flex items-center justify-center" style="background-color: #FFFFFF !important; background: #FFFFFF !important;">
+            <svg id="memberBarcodeSvg" class="w-full max-w-[240px] h-12 block mx-auto" style="background-color: #FFFFFF !important; background: #FFFFFF !important;"></svg>
+        </div>
+
+        <p class="text-xs text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+            Show this screen to the shop counter to verify points or claim gifts in 1 second!
+        </p>
+
+        <button type="button" onclick="closeMemberPassModal()"
+                class="btn-tap mt-3.5 w-full py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-display text-xs font-bold rounded-xl transition cursor-pointer">
+            Done
+        </button>
+    </div>
+</div>
+
+<!-- 7. IN-APP CAMERA SCANNER MODAL -->
+<div id="qrScannerModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="flex items-center justify-between mb-3">
+            <div>
+                <h3 class="font-headline text-xl font-bold text-[#0F172A] dark:text-white">Scan Paper Chit</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Hold your phone camera steady over the QR code</p>
+            </div>
+            <button onclick="closeQRScannerModal()"
+                    class="modal-close-btn btn-tap w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-900 dark:text-white font-black flex items-center justify-center cursor-pointer transition border border-slate-300 dark:border-slate-500 shadow-sm text-base"
+                    title="Close scanner"
+                    aria-label="Close scanner">
+                <span class="text-base font-black leading-none text-slate-900 dark:text-white">✕</span>
+            </button>
+        </div>
+
+        <!-- Camera Viewfinder -->
+        <div class="relative rounded-2xl overflow-hidden bg-slate-900 border-2 border-[#D97706] aspect-square mb-3.5 flex items-center justify-center">
+            <div class="laser-line"></div>
+            <div id="qr-reader" class="w-full h-full"></div>
+            <p id="cameraStatusText" class="text-xs text-slate-300 text-center px-6 absolute pointer-events-none z-30 font-medium">
+                Opening camera...
+            </p>
+        </div>
+
+        <!-- Upload Image Option -->
+        <div class="mb-3">
+            <label class="btn-tap block w-full text-center bg-[#FFFBEB] dark:bg-amber-950/40 hover:bg-[#FEF3C7] dark:hover:bg-amber-900/50 text-[#92400E] dark:text-amber-200 font-display text-xs font-bold py-2.5 px-3 rounded-xl cursor-pointer border border-[#FDE68A] dark:border-amber-700/60 transition shadow-sm">
+                📁 Upload Chit Image from Device
+                <input type="file" id="qr-input-file" accept="image/*" class="hidden" onchange="scanUploadedFile(this)">
+            </label>
+        </div>
+
+        <!-- Manual Slip Code Entry -->
+        <div class="border-t border-slate-200 dark:border-slate-800 pt-3">
+            <form id="manualChitForm" method="GET" action="/scan-token/" novalidate class="flex gap-2">
+                <!-- Anti-Bot Honeypot Field -->
+                <div style="display:none !important; visibility:hidden !important; position:absolute; left:-9999px;" aria-hidden="true">
+                    <input type="text" name="website_trap_val" tabindex="-1" autocomplete="off">
+                </div>
+                <input type="text" id="manualTokenInput" name="token" maxlength="10" placeholder="Or enter 6-digit Chit ID"
+                       class="flex-grow px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl border-2 border-slate-200 dark:border-slate-700 focus:border-[#D97706] focus:outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white transition">
+                <button type="submit" class="btn-tap bg-gradient-to-r from-[#D97706] to-[#EA580C] hover:from-[#B45309] hover:to-[#C2410C] text-white font-display text-xs font-bold px-4 py-2.5 rounded-xl transition cursor-pointer shadow-sm shrink-0">
+                    Enter
+                </button>
+            </form>
+            <!-- Modern Elegant Error Alert -->
+            <div id="tokenErrorMsg" class="hidden text-xs text-amber-900 dark:text-amber-200 font-semibold mt-2 flex items-center gap-1.5 bg-[#FEF3C7] dark:bg-amber-950/60 border border-[#FDE68A] dark:border-amber-700/60 px-3 py-1.5 rounded-xl shadow-xs transition-all">
+                <span class="text-amber-700 dark:text-amber-300">⚠️</span>
+                <span id="tokenErrorText">Please enter the 6-character Chit ID from your paper slip</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let html5QrCode = null;
+
+function enforceCameraCover() {
+    const video = document.querySelector('#qr-reader video');
+    if (video) {
+        video.style.setProperty('width', '100%', 'important');
+        video.style.setProperty('height', '100%', 'important');
+        video.style.setProperty('object-fit', 'cover', 'important');
+        video.style.setProperty('object-position', 'center center', 'important');
+    }
+}
+
+function savePendingClaimAndNotify(targetUrl) {
+    try {
+        localStorage.setItem('nandhini_pending_claim_url', targetUrl);
+    } catch (_) {}
+    const banner = document.getElementById('offlineSyncBanner');
+    if (banner) {
+        banner.classList.remove('hidden');
+        banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+        alert("📶 Internet Offline: Your chit is safely cached! Points will be credited automatically when your connection returns.");
+    }
+}
+
+function checkAndSyncPendingClaim() {
+    try {
+        const pendingUrl = localStorage.getItem('nandhini_pending_claim_url');
+        if (pendingUrl && navigator.onLine) {
+            localStorage.removeItem('nandhini_pending_claim_url');
+            const syncToast = document.getElementById('onlineSyncToast');
+            if (syncToast) syncToast.classList.remove('hidden');
+            setTimeout(() => {
+                window.location.href = pendingUrl;
+            }, 800);
+        }
+    } catch (_) {}
+}
+
+window.addEventListener('online', checkAndSyncPendingClaim);
+window.addEventListener('load', checkAndSyncPendingClaim);
+
+function handleDecodedText(decodedText) {
+    if (navigator.vibrate) navigator.vibrate(80);
+    closeQRScannerModal();
+    let targetUrl = '';
+    if (decodedText.includes('/claim/')) {
+        const parts = decodedText.split('/claim/');
+        const token = parts[1].replace(/\//g, '');
+        targetUrl = `/claim/${token}/`;
+    } else {
+        targetUrl = `/scan-token/?token=${encodeURIComponent(decodedText)}`;
+    }
+
+    if (!navigator.onLine) {
+        savePendingClaimAndNotify(targetUrl);
+        return;
+    }
+    window.location.href = targetUrl;
+}
+
+function renderMemberBarcode() {
+    try {
+        if (typeof JsBarcode === 'function') {
+            JsBarcode("#memberBarcodeSvg", "NS{{ customer.phone_number }}", {
+                format: "CODE128",
+                width: 2,
+                height: 42,
+                displayValue: true,
+                fontSize: 11,
+                font: "monospace",
+                textMargin: 3,
+                margin: 4,
+                lineColor: "#000000",
+                background: "#FFFFFF"
+            });
+        }
+    } catch (e) {
+        console.warn("JsBarcode error:", e);
+    }
+}
+
+function openMemberPassModal() {
+    const modal = document.getElementById('memberPassModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        renderMemberBarcode();
+    }
+}
+
+function closeMemberPassModal() {
+    const modal = document.getElementById('memberPassModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+function handleMemberPassBackdrop(event) {
+    if (event.target === document.getElementById('memberPassModal')) {
+        closeMemberPassModal();
+    }
+}
+
+function openQRScannerModal() {
+    document.getElementById('qrScannerModal').classList.remove('hidden');
+    const statusText = document.getElementById('cameraStatusText');
+    statusText.innerText = "Requesting camera access...";
+
+    if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("qr-reader");
+    }
+
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 15, aspectRatio: 1.0, qrbox: { width: 220, height: 220 } },
+        (decodedText) => { handleDecodedText(decodedText); },
+        (errorMessage) => {}
+    ).then(() => {
+        statusText.innerText = "";
+        enforceCameraCover();
+        // Keep ensuring video covers the viewfinder without black letterbox bars
+        const coverInterval = setInterval(enforceCameraCover, 250);
+        setTimeout(() => clearInterval(coverInterval), 3000);
+    }).catch((err) => {
+        statusText.innerText = "Camera not accessible. You can upload an image or enter the 6-digit ID below.";
+    });
+}
+
+function closeQRScannerModal() {
+    document.getElementById('qrScannerModal').classList.add('hidden');
+    if (html5QrCode) {
+        try {
+            html5QrCode.stop().then(() => {
+                html5QrCode.clear();
+            }).catch(() => {});
+        } catch (e) {}
+    }
+}
+
+async function scanUploadedFile(input) {
+    if (!input.files || input.files.length === 0) return;
+    const imageFile = input.files[0];
+    const statusText = document.getElementById('cameraStatusText');
+    const errorDiv = document.getElementById('tokenErrorMsg');
+    const errorText = document.getElementById('tokenErrorText');
+
+    if (errorDiv) errorDiv.classList.add('hidden');
+    if (statusText) statusText.innerText = "Analyzing uploaded chit image...";
+
+    // Safely stop live camera scanning if active to prevent Html5Qrcode conflict
+    if (html5QrCode) {
+        try {
+            if (html5QrCode.isScanning) {
+                await html5QrCode.stop();
+            }
+        } catch (_) {}
+    }
+
+    // Helper: Decode via jsQR across multiple passes (original, left-half crop, scaled)
+    function tryJsQR(img) {
+        if (typeof jsQR === 'undefined') return null;
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            if (!ctx) return null;
+
+            const w = img.naturalWidth || img.width;
+            const h = img.naturalHeight || img.height;
+
+            // Pass 1: Original Resolution
+            canvas.width = w;
+            canvas.height = h;
+            ctx.drawImage(img, 0, 0, w, h);
+            let imgData = ctx.getImageData(0, 0, w, h);
+            let result = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: "attemptBoth" });
+            if (result && result.data) return result.data;
+
+            // Pass 2: Left-Half Crop (QR code is on the left half of our paper slips)
+            const cropW = Math.round(w * 0.55);
+            canvas.width = cropW;
+            canvas.height = h;
+            ctx.drawImage(img, 0, 0, cropW, h, 0, 0, cropW, h);
+            imgData = ctx.getImageData(0, 0, cropW, h);
+            result = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: "attemptBoth" });
+            if (result && result.data) return result.data;
+
+            // Pass 3: Downscale if huge photo from smartphone camera (e.g. 4000x3000)
+            const maxDim = Math.max(w, h);
+            if (maxDim > 1000) {
+                const scale = 1000 / maxDim;
+                canvas.width = Math.round(w * scale);
+                canvas.height = Math.round(h * scale);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                result = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: "attemptBoth" });
+                if (result && result.data) return result.data;
+            }
+        } catch (e) {
+            console.warn("jsQR decode attempt error:", e);
+        }
+        return null;
+    }
+
+    let decodedText = null;
+
+    // Strategy 1: Fast direct canvas decode via jsQR
+    try {
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(imageFile);
+        await new Promise((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = reject;
+            img.src = objectUrl;
+        });
+        decodedText = tryJsQR(img);
+        URL.revokeObjectURL(objectUrl);
+    } catch (e) {
+        console.warn("Image loading error for jsQR:", e);
+    }
+
+    // Strategy 2: Fallback to Html5Qrcode.scanFile
+    if (!decodedText) {
+        try {
+            const scanner = html5QrCode || new Html5Qrcode("qr-reader");
+            decodedText = await scanner.scanFile(imageFile, false);
+        } catch (e) {
+            console.warn("Html5Qrcode scanFile error:", e);
+        }
+    }
+
+    // Reset input so re-selecting the same file works immediately
+    input.value = '';
+
+    if (decodedText) {
+        handleDecodedText(decodedText);
+    } else {
+        if (statusText) statusText.innerText = "";
+        if (errorDiv && errorText) {
+            errorText.innerText = "Could not detect a clear QR code in this image. Please enter the 6-character Chit ID below.";
+            errorDiv.classList.remove('hidden');
+        } else {
+            alert("Could not detect a clear QR code in this image. You can enter the 6-character Chit ID directly below.");
+        }
+    }
+}
+
+// Modern Custom Validation for Chit Entry (Replaces browser bubble)
+const manualForm = document.getElementById('manualChitForm');
+if (manualForm) {
+    manualForm.addEventListener('submit', function(e) {
+        const input = document.getElementById('manualTokenInput');
+        const errorDiv = document.getElementById('tokenErrorMsg');
+        const errorText = document.getElementById('tokenErrorText');
+        const val = input.value.trim();
+
+        if (!val) {
+            e.preventDefault();
+            input.classList.remove('border-slate-200');
+            input.classList.add('border-amber-500', 'bg-amber-50/40');
+            errorText.innerText = "Please enter the 6-character Chit ID from your slip";
+            errorDiv.classList.remove('hidden');
+            input.focus();
+            return false;
+        }
+
+        if (val.length < 6) {
+            e.preventDefault();
+            input.classList.remove('border-slate-200');
+            input.classList.add('border-amber-500', 'bg-amber-50/40');
+            errorText.innerText = "Chit ID must be at least 6 characters (e.g. 50A1B2)";
+            errorDiv.classList.remove('hidden');
+            input.focus();
+            return false;
+        }
+
+        if (!navigator.onLine) {
+            e.preventDefault();
+            closeQRScannerModal();
+            const targetUrl = `/scan-token/?token=${encodeURIComponent(val)}`;
+            savePendingClaimAndNotify(targetUrl);
+            return false;
+        }
+    });
+
+    const tokenInput = document.getElementById('manualTokenInput');
+    if (tokenInput) {
+        tokenInput.addEventListener('input', function() {
+            this.classList.remove('border-amber-500', 'bg-amber-50/40');
+            this.classList.add('border-slate-200');
+            const errorDiv = document.getElementById('tokenErrorMsg');
+            if (errorDiv) errorDiv.classList.add('hidden');
+        });
+    }
+}
+
+// ==============================================================
+// NEURO-SCIENTIFIC AUDIO SYNTHESIZER & HAPTIC VIBRATION ENGINE
+// ==============================================================
+function playDopamineHarmonicChime() {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        if (ctx.state === 'suspended') {
+            ctx.resume();
+        }
+
+        // Ascending major triad arpeggio: C5 -> E5 -> G5 -> C6
+        const notes = [
+            { freq: 523.25, time: 0.00 },
+            { freq: 659.25, time: 0.08 },
+            { freq: 783.99, time: 0.16 },
+            { freq: 1046.50, time: 0.24 },
+        ];
+
+        notes.forEach(n => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(n.freq, ctx.currentTime + n.time);
+
+            const startTime = ctx.currentTime + n.time;
+            const duration = 0.45;
+
+            // 0.02s soft attack, 0.45s warm exponential decay
+            gain.gain.setValueAtTime(0.0001, startTime);
+            gain.gain.linearRampToValueAtTime(0.26, startTime + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        });
+    } catch (e) {
+        console.warn('Audio chime notice:', e);
+    }
+}
+
+function triggerHapticFeedback(style) {
+    if (!('vibrate' in navigator)) return;
+    try {
+        if (style === 'celebration') {
+            navigator.vibrate([100, 40, 100, 40, 220]);
+        } else if (style === 'silent') {
+            // Visual only
+        } else {
+            // Gentle pulse: 80ms tap, 50ms pause, 160ms pulse
+            navigator.vibrate([80, 50, 160]);
+        }
+    } catch (e) {
+        console.warn('Haptic notice:', e);
+    }
+}
+
+// Service Worker & Web Push Engine (Background notifications when website is closed)
+let swRegistration = null;
+
+function urlB64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
+async function registerServiceWorkerAndPush() {
+    if ('serviceWorker' in navigator) {
+        try {
+            swRegistration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+            console.log('Nandhini Service Worker active:', swRegistration.scope);
+
+            if (Notification.permission === 'granted' && 'PushManager' in window) {
+                subscribeUserToPush();
+            }
+        } catch (error) {
+            console.warn('Service Worker notice:', error);
+        }
+    }
+}
+
+async function subscribeUserToPush() {
+    try {
+        if (!swRegistration) {
+            swRegistration = await navigator.serviceWorker.ready;
+        }
+        if (!swRegistration || !swRegistration.pushManager) return;
+
+        const resp = await fetch('/api/vapid-public-key/');
+        const data = await resp.json();
+        if (!data || !data.publicKey) return;
+
+        const applicationServerKey = urlB64ToUint8Array(data.publicKey);
+        const subscription = await swRegistration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: applicationServerKey
+        });
+
+        await fetch('/api/save-subscription/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(subscription)
+        });
+        console.log('Registered for offline push notifications.');
+    } catch (e) {
+        console.warn('Push subscription notice:', e);
+    }
+}
+
+// Native Web Push Notifications (Works in foreground, background, and OS shade)
+function triggerSystemNotification(title, body) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const targetUrl = window.location.origin + '/dashboard/';
+    try {
+        if (swRegistration && swRegistration.showNotification) {
+            swRegistration.showNotification(title, {
+                body: body,
+                icon: 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png',
+                badge: 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png',
+                vibrate: [100, 40, 100, 40, 220],
+                tag: 'nandhini-broadcast',
+                renotify: true,
+                requireInteraction: true,
+                data: { url: targetUrl }
+            });
+        } else if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+                type: 'SHOW_NOTIFICATION',
+                title: title,
+                message: body,
+                url: targetUrl,
+                haptic: 'celebration'
+            });
+        } else {
+            const n = new Notification(title, {
+                body: body,
+                icon: 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png',
+                tag: 'nandhini-broadcast',
+                data: { url: targetUrl }
+            });
+            n.onclick = function() {
+                window.focus();
+                window.location.href = targetUrl;
+                n.close();
+            };
+        }
+    } catch (e) {
+        console.warn('Notification notice:', e);
+    }
+}
+
+async function requestNotificationPermission() {
+    if (!('Notification' in window)) {
+        alert('Browser notifications are not supported on this browser.');
+        return;
+    }
+    try {
+        const permission = await Notification.requestPermission();
+        updateNotificationButtonState();
+        if (permission === 'granted') {
+            playDopamineHarmonicChime();
+            triggerHapticFeedback('celebration');
+            await subscribeUserToPush();
+            triggerSystemNotification(
+                "🎉 Reward Alerts Active!",
+                "You will now receive instant push alerts from Nandhini Stationery even when this website is closed!"
+            );
+        }
+    } catch (e) {
+        console.warn('Permission request notice:', e);
+    }
+}
+
+function updateNotificationButtonState() {
+    const promptBar = document.getElementById('pushPromptBar');
+    if (!promptBar) return;
+    if (!('Notification' in window)) {
+        promptBar.classList.add('hidden');
+        return;
+    }
+    if (Notification.permission === 'granted' || Notification.permission === 'denied') {
+        promptBar.classList.add('hidden');
+    } else {
+        promptBar.classList.remove('hidden');
+    }
+}
+
+// Toast & Persistent Banner Handlers
+let toastTimer = null;
+
+function showToastModal(title, message) {
+    const toast = document.getElementById('broadcastToastModal');
+    if (!toast) return;
+
+    if (toastTimer) {
+        clearTimeout(toastTimer);
+        toastTimer = null;
+    }
+
+    const tTitle = document.getElementById('toastTitle');
+    const tMessage = document.getElementById('toastMessage');
+    if (tTitle) tTitle.innerText = title;
+    if (tMessage) tMessage.innerText = message;
+
+    // Remove hidden display first, force reflow, then animate in
+    toast.classList.remove('hidden');
+    void toast.offsetWidth;
+
+    toast.classList.remove('-translate-y-36', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+
+    toastTimer = setTimeout(() => {
+        dismissToastModal();
+    }, 8000);
+}
+
+function dismissToastModal() {
+    const toast = document.getElementById('broadcastToastModal');
+    if (!toast) return;
+
+    if (toastTimer) {
+        clearTimeout(toastTimer);
+        toastTimer = null;
+    }
+
+    toast.classList.remove('translate-y-0', 'opacity-100');
+    toast.classList.add('-translate-y-36', 'opacity-0');
+
+    // Completely remove from DOM rendering tree after animation so no clicks can ever be blocked
+    setTimeout(() => {
+        toast.classList.add('hidden');
+    }, 320);
+}
+
+function dismissPersistentBanner() {
+    const banner = document.getElementById('persistentBroadcastBanner');
+    if (banner) {
+        banner.classList.add('hidden');
+        const ver = banner.getAttribute('data-version') || window.nandhini_current_broadcast_version || 'dismissed';
+        sessionStorage.setItem('nandhini_dismissed_version', ver);
+        localStorage.setItem('nandhini_dismissed_' + ver, 'true');
+    }
+}
+
+// Fast Real-Time Broadcast Poller (3-Second Live Sync without refreshing)
+function pollLatestBroadcast() {
+    fetch('/api/latest-broadcast/')
+        .then(res => res.json())
+        .then(data => {
+            const banner = document.getElementById('persistentBroadcastBanner');
+
+            // 1. If broadcast was deleted by admin, immediately remove it from view without refresh
+            if (!data || !data.has_active) {
+                if (banner) banner.classList.add('hidden');
+                return;
+            }
+
+            const currentVersion = data.version || (String(data.id) + '_' + (data.updated_at || data.created_at));
+            window.nandhini_current_broadcast_version = currentVersion;
+            const lastSeenVersion = localStorage.getItem('nandhini_last_broadcast_version');
+
+            // 2. Check if this is a NEW or EDITED broadcast
+            const isNewOrUpdated = (lastSeenVersion !== currentVersion);
+
+            if (isNewOrUpdated) {
+                // If admin sent a new message or edited a mistake, reset dismissal so user sees the update
+                sessionStorage.removeItem('nandhini_dismissed_version');
+                localStorage.setItem('nandhini_last_broadcast_version', currentVersion);
+                localStorage.setItem('nandhini_last_broadcast_id', String(data.id));
+
+                // A. Play dopamine chime
+                playDopamineHarmonicChime();
+
+                // B. Trigger tactile haptic vibration
+                triggerHapticFeedback(data.haptic_style || 'celebration');
+
+                // C. Drop down animated toast modal
+                showToastModal(data.title, data.message);
+
+                // D. Trigger OS System Notification (shows in Windows Action Center / Android Shade)
+                triggerSystemNotification(data.title, data.message);
+            }
+
+            // 3. Update persistent banner content live without refresh
+            if (banner) {
+                banner.setAttribute('data-version', currentVersion);
+                const bTitle = document.getElementById('bannerTitle');
+                const bMsg = document.getElementById('bannerMessage');
+                const ts = document.getElementById('bannerTimestamp');
+                if (bTitle) bTitle.innerText = data.title;
+                if (bMsg) bMsg.innerText = data.message;
+                if (ts && (data.updated_at || data.created_at)) ts.innerText = data.created_at;
+
+                // Check if user dismissed this specific version in this session or stored preferences
+                const isDismissed = (sessionStorage.getItem('nandhini_dismissed_version') === currentVersion) ||
+                                    (localStorage.getItem('nandhini_dismissed_' + currentVersion) === 'true');
+                if (isDismissed) {
+                    banner.classList.add('hidden');
+                } else {
+                    banner.classList.remove('hidden');
+                }
+            }
+        })
+        .catch(err => console.debug('Broadcast poll sync:', err));
+}
+
+// Initialize on DOM load
+document.addEventListener('DOMContentLoaded', function() {
+    registerServiceWorkerAndPush();
+    updateNotificationButtonState();
+
+    // Check if initial banner in template was already dismissed
+    const initialBanner = document.getElementById('persistentBroadcastBanner');
+    if (initialBanner) {
+        const v = initialBanner.getAttribute('data-version');
+        if (v && (sessionStorage.getItem('nandhini_dismissed_version') === v || localStorage.getItem('nandhini_dismissed_' + v) === 'true')) {
+            initialBanner.classList.add('hidden');
+        }
+    }
+
+    pollLatestBroadcast();
+    // 3-Second Fast Polling for live zero-refresh updates
+    setInterval(pollLatestBroadcast, 3000);
+
+    // Instant sync when user tabs back or unlocks screen
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            pollLatestBroadcast();
+        }
+    });
+});
+</script>
+{% endblock %}

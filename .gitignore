@@ -1,0 +1,45 @@
+# Nandhini Stationery - Watertight Git Ignore
+
+# Environment Variables & Secret Keys
+.env
+*.env
+*.key
+*.pem
+
+# SQLite Databases, WAL Files & Backups
+db.sqlite3
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+backups/
+
+# Static Collection & User Uploads
+staticfiles/
+.user_uploaded/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+# Logs & Temporary Files
+logs/
+*.log
+scratch/
+
+# IDE & Editor Artifacts
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# Test Artifacts & Generated PNGs
+test_*.png
+test_qr_*.png
+

@@ -1,0 +1,292 @@
+{% extends 'rewards/base.html' %}
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+    /* Absolute high-contrast visibility guarantee for Scratch Card in Light & Dark modes */
+    #scratchCardBox {
+        border-color: #FDE68A;
+        background: linear-gradient(135deg, #FFFFFF 0%, #FAF7F2 50%, #F5ECE0 100%);
+        transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    html.dark #scratchCardBox {
+        background: linear-gradient(135deg, #0B132B 0%, #0F172A 50%, #1E293B 100%) !important;
+        border-color: #F59E0B !important;
+        box-shadow: 0 0 35px rgba(245, 158, 11, 0.25), 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    .prize-title {
+        color: #92400E !important;
+        font-weight: 800 !important;
+    }
+    html.dark .prize-title {
+        color: #FBBF24 !important;
+        text-shadow: 0 1px 8px rgba(251, 191, 36, 0.35);
+    }
+
+    .prize-points-val {
+        color: #0F172A !important;
+        font-weight: 900 !important;
+    }
+    html.dark .prize-points-val {
+        color: #FDE68A !important;
+        text-shadow: 0 0 25px rgba(251, 191, 36, 0.6), 0 2px 10px rgba(0, 0, 0, 0.8) !important;
+    }
+
+    .prize-unit-label {
+        color: #92400E !important;
+        font-weight: 800 !important;
+    }
+    html.dark .prize-unit-label {
+        color: #FBBF24 !important;
+        text-shadow: 0 1px 8px rgba(251, 191, 36, 0.35);
+    }
+
+    .prize-balance-text {
+        color: #64748B !important;
+    }
+    html.dark .prize-balance-text {
+        color: #94A3B8 !important;
+    }
+
+    .prize-balance-val {
+        color: #0F172A !important;
+        font-weight: 800 !important;
+    }
+    html.dark .prize-balance-val {
+        color: #F8FAFC !important;
+    }
+</style>
+
+<div class="text-center pt-2">
+    {% if is_revisit %}
+    <!-- Friendly Revisit Confirmation Banner -->
+    <div class="mb-4 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-600/40 text-left shadow-sm">
+        <div class="flex items-start gap-3">
+            <span class="text-2xl shrink-0">✅</span>
+            <div class="min-w-0">
+                <h4 class="text-xs sm:text-sm font-bold text-emerald-900 dark:text-emerald-200 uppercase tracking-wide">
+                    Points Already Added to Your Account
+                </h4>
+                <p class="text-xs text-emerald-800 dark:text-emerald-300/90 mt-1 leading-relaxed font-medium">
+                    You previously claimed this chit at <strong>{{ claimed_time_str }}</strong>. The +<strong>{{ points_won }}</strong> points are safely credited in your current balance (<strong class="font-bold">{{ customer.total_points }} Pts</strong>).
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Distinct Tier Pill based on Tier -->
+    <div class="inline-flex items-center gap-1.5 px-4 py-1 rounded-full font-display text-xs font-bold shadow-sm mb-2
+        {% if slip.tier == '50' %}bg-[#FFF0F3] text-[#881337] border border-[#F472B6] dark:bg-pink-950/70 dark:text-pink-200 dark:border-pink-500/60
+        {% elif slip.tier == '100' %}bg-[#F0F7FF] text-[#082F49] border border-[#38BDF8] dark:bg-sky-950/70 dark:text-sky-200 dark:border-sky-500/60
+        {% elif slip.tier == '500' %}bg-[#FAF5FF] text-[#3B0764] border border-[#C084FC] dark:bg-purple-950/70 dark:text-purple-200 dark:border-purple-500/60
+        {% elif slip.tier == '1000' %}bg-[#F0FDF4] text-[#064E3B] border-2 border-[#D97706] dark:bg-emerald-950/70 dark:text-amber-200 dark:border-amber-500/70
+        {% else %}bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200{% endif %}">
+        <span>✨</span> Tier ₹{{ slip.tier }}+ Purchase Verified
+    </div>
+
+    <h2 class="font-headline text-3xl font-bold text-[#0F172A] dark:text-white mt-1 tracking-tight">Scratch to Claim Points</h2>
+    <p class="text-xs text-slate-500 dark:text-slate-400 mb-5 font-medium">Rub your finger over the champagne gold card below</p>
+
+    <!-- Scratch Card Container with Champagne Gold Trim (Light) / Luxury Obsidian Gold (Dark) -->
+    <div id="scratchCardBox" class="relative w-72 h-72 mx-auto rounded-3xl shadow-xl overflow-hidden border-4 flex flex-col items-center justify-center select-none">
+        <!-- Prize Underneath -->
+        <div class="p-6 text-center w-full relative z-0">
+            <p class="font-display text-xs tracking-widest uppercase prize-title">You Received</p>
+            <p class="font-number text-6xl my-1 tabular-nums leading-none prize-points-val">
+                +{{ points_won }}
+            </p>
+            <p class="font-display text-sm tracking-widest uppercase prize-unit-label">Loyalty Points 🎉</p>
+            <p class="text-xs mt-2 font-medium prize-balance-text">New Balance: <strong class="font-number tabular-nums prize-balance-val">{{ customer.total_points }} Pts</strong></p>
+        </div>
+
+        <!-- Interactive HTML5 Canvas Overlay -->
+        <canvas id="scratchCanvas" width="288" height="288" class="absolute inset-0 cursor-pointer touch-none z-10"></canvas>
+    </div>
+
+    <!-- Post-Scratch Action Buttons -->
+    <div id="afterScratchBox" class="mt-6 opacity-30 transition-all duration-500 space-y-3">
+        <!-- 1-Click WhatsApp Share with Friends Button -->
+        <a id="whatsappShareBtn" href="{{ whatsapp_share_url }}"
+           target="_blank" rel="noopener noreferrer"
+           class="flex items-center justify-center gap-2.5 w-full bg-[#25D366] hover:bg-[#20BA5A] active:scale-95 text-white font-display text-sm sm:text-base font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-emerald-500/20 transition cursor-pointer">
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            <span>Share My Win on WhatsApp</span>
+        </a>
+
+        <!-- Return to Rewards Journal -->
+        <a href="/dashboard/" class="block w-full bg-gradient-to-r from-[#D97706] to-[#EA580C] hover:from-[#B45309] hover:to-[#C2410C] active:scale-95 transition text-white font-display text-base font-bold py-3.5 rounded-2xl shadow-xl border border-[#FDBA74]/50">
+            View Rewards Journal →
+        </a>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('scratchCanvas');
+const ctx = canvas.getContext('2d');
+let isDrawing = false;
+let revealed = false;
+
+// AudioContext Synthesizer (Instant retro arcade celebratory coin chime)
+let audioCtx = null;
+function getAudioContext() {
+    if (!audioCtx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+            audioCtx = new AudioCtx();
+        }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+    }
+    return audioCtx;
+}
+
+function playCoinChime() {
+    try {
+        const actx = getAudioContext();
+        if (!actx) return;
+
+        const playNote = (freq, startOffset, duration) => {
+            const osc = actx.createOscillator();
+            const gain = actx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, actx.currentTime + startOffset);
+
+            gain.gain.setValueAtTime(0, actx.currentTime + startOffset);
+            gain.gain.linearRampToValueAtTime(0.35, actx.currentTime + startOffset + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + startOffset + duration);
+
+            osc.connect(gain);
+            gain.connect(actx.destination);
+
+            osc.start(actx.currentTime + startOffset);
+            osc.stop(actx.currentTime + startOffset + duration);
+        };
+
+        // Joyful two-tone rising coin arpeggio (B5 -> E6)
+        playNote(987.77, 0.0, 0.35);
+        playNote(1318.51, 0.12, 0.55);
+    } catch (_) {}
+}
+
+function drawScratchSurface() {
+    if (revealed) return;
+    const isDark = document.documentElement.classList.contains('dark');
+    const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    if (isDark) {
+        grad.addColorStop(0, '#C29B38');
+        grad.addColorStop(0.3, '#F5D77F');
+        grad.addColorStop(0.7, '#DFB752');
+        grad.addColorStop(1, '#A07820');
+    } else {
+        grad.addColorStop(0, '#E8DFC8');
+        grad.addColorStop(0.5, '#F5ECE0');
+        grad.addColorStop(1, '#D9CCB4');
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Scratch prompt text
+    ctx.fillStyle = isDark ? '#451A03' : '#92400E';
+    ctx.font = 'bold 20px "Playfair Display", Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('SCRATCH TO REVEAL 🪙', canvas.width / 2, (canvas.height / 2) - 6);
+    ctx.font = '600 13px "Poppins", sans-serif';
+    ctx.fillStyle = isDark ? '#5E2B06' : '#78350F';
+    ctx.fillText('Nandhini Stationery', canvas.width / 2, (canvas.height / 2) + 20);
+}
+
+{% if is_revisit %}
+// Pre-reveal for same-customer revisit within grace window
+revealed = true;
+if (canvas) canvas.style.display = 'none';
+const afterBoxOnLoad = document.getElementById('afterScratchBox');
+if (afterBoxOnLoad) afterBoxOnLoad.classList.remove('opacity-30');
+{% else %}
+drawScratchSurface();
+window.addEventListener('themeChanged', drawScratchSurface);
+{% endif %}
+
+function getCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+    };
+}
+
+function scratch(e) {
+    if (!isDrawing || revealed) return;
+    if (e.cancelable) e.preventDefault();
+    getAudioContext(); // Initialize audio on user scratch gesture
+    const { x, y } = getCoords(e);
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, 32, 0, Math.PI * 2);
+    ctx.fill();
+    checkRevealPercentage();
+}
+
+function checkRevealPercentage() {
+    if (revealed) return;
+    try {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let transparentPixels = 0;
+        for (let i = 3; i < imageData.length; i += 16) {
+            if (imageData[i] === 0) transparentPixels++;
+        }
+        const totalSampled = imageData.length / 16;
+        if ((transparentPixels / totalSampled) > 0.40 && !revealed) {
+            triggerFullReveal();
+        }
+    } catch (err) {
+        console.error('Scratch check error', err);
+    }
+}
+
+function triggerFullReveal() {
+    revealed = true;
+    canvas.style.transition = 'opacity 0.4s ease';
+    canvas.style.opacity = '0';
+    setTimeout(() => {
+        if (canvas.parentNode) canvas.remove();
+    }, 400);
+
+    const afterBox = document.getElementById('afterScratchBox');
+    if (afterBox) {
+        afterBox.classList.remove('opacity-30');
+    }
+
+    // Play synthesized coin chime sound
+    playCoinChime();
+
+    if (navigator.vibrate) {
+        try {
+            navigator.vibrate([60, 40, 120]);
+        } catch (e) {}
+    }
+
+    if (typeof confetti === 'function') {
+        confetti({
+            particleCount: 100,
+            spread: 75,
+            origin: { y: 0.6 }
+        });
+    }
+}
+
+canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); });
+canvas.addEventListener('mousemove', scratch);
+window.addEventListener('mouseup', () => isDrawing = false);
+
+canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); }, { passive: false });
+canvas.addEventListener('touchmove', scratch, { passive: false });
+window.addEventListener('touchend', () => isDrawing = false);
+</script>
+{% endblock %}

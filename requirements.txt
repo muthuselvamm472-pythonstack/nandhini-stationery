@@ -1,0 +1,12 @@
+# Nandhini Stationery - Production Dependencies (Pinned)
+Django==5.2.16
+python-decouple==3.8
+django-cors-headers==4.9.0
+whitenoise==6.12.0
+waitress==3.0.2
+gunicorn==23.0.0
+pywebpush==2.5.0
+py-vapid==1.9.6
+qrcode==8.2
+pillow==12.3.0
+

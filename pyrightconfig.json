@@ -1,0 +1,15 @@
+{
+  "include": [
+    "."
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__"
+  ],
+  "reportAttributeAccessIssue": "none",
+  "reportGeneralTypeIssues": "none",
+  "reportOperatorIssue": "none",
+  "reportArgumentType": "none",
+  "reportAssignmentType": "none",
+  "reportIndexIssue": "none"
+}

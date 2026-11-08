@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en" class="overflow-x-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nandhini Stationery | நந்தினி ஸ்டேஷனரி Rewards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        };
+        // Default to LIGHT mode. Only enable dark if explicitly saved as 'dark' in localStorage
+        (function() {
+            var theme = localStorage.getItem('nandhini_customer_theme');
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..900;1,400..900&family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Noto+Serif+Tamil:ital,wght@0,400..900;1,400..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
+    <style>
+        /* Modern Psychology & Neuroscience Typography System */
+        /* Body: Poppins (Clean, Friendly, Highly Readable Geometric Sans) */
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #FAF9F6;
+            color: #0F172A;
+            letter-spacing: -0.01em;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        /* Full Dark Theme System (Default is Light) */
+        html.dark {
+            color-scheme: dark;
+        }
+        html.dark body {
+            background-color: #0B0F19 !important;
+            color: #F8FAFC !important;
+        }
+        html.dark header {
+            background-color: rgba(15, 23, 42, 0.95) !important;
+            border-color: #1E293B !important;
+        }
+        html.dark header h1 {
+            color: #F8FAFC !important;
+        }
+        html.dark .bg-white:not(.qr-barcode-exempt) {
+            background-color: #111827 !important;
+            color: #F8FAFC !important;
+        }
+        /* QR & Barcode Card Exemption - Guaranteed Pure White in Dark Mode */
+        html.dark .qr-barcode-exempt,
+        html.dark .qr-barcode-exempt *,
+        .qr-barcode-exempt {
+            background-color: #FFFFFF !important;
+            background: #FFFFFF !important;
+            color: #000000 !important;
+        }
+        html.dark .bg-slate-50 {
+            background-color: #1E293B !important;
+        }
+        html.dark .border-slate-200,
+        html.dark .border-slate-100 {
+            border-color: #1F2937 !important;
+        }
+        html.dark .border-slate-300 {
+            border-color: #374151 !important;
+        }
+
+        /* Universal Dark Mode High-Contrast Text Overrides (Fixes all invisible text in Dark Mode) */
+        html.dark [class*="text-[#0F172A]"]:not(#scratchCardBox *),
+        html.dark [class*="text-[#0f172a]"]:not(#scratchCardBox *),
+        html.dark [class*="text-slate-900"]:not(#scratchCardBox *),
+        html.dark [class*="text-slate-800"]:not(#scratchCardBox *) {
+            color: #F8FAFC !important;
+        }
+        html.dark [class*="text-slate-700"],
+        html.dark [class*="text-slate-600"] {
+            color: #E2E8F0 !important;
+        }
+        html.dark [class*="text-slate-500"],
+        html.dark [class*="text-slate-400"] {
+            color: #94A3B8 !important;
+        }
+        html.dark h1,
+        html.dark h2,
+        html.dark h3,
+        html.dark h4,
+        html.dark h5,
+        html.dark h6 {
+            color: #F8FAFC !important;
+        }
+
+        html.dark input,
+        html.dark select,
+        html.dark textarea {
+            background-color: #1E293B !important;
+            color: #F8FAFC !important;
+            border-color: #374151 !important;
+        }
+        html.dark input.bg-transparent,
+        html.dark #phoneInputWrapper input,
+        html.dark #nameInputWrapper input {
+            background-color: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
+        }
+        html.dark #phoneInputWrapper,
+        html.dark #nameInputWrapper {
+            background-color: #1E293B !important;
+            border-color: #334155 !important;
+        }
+        html.dark #themeToggleBtn {
+            background-color: #1E293B !important;
+            border-color: #334155 !important;
+            color: #FDE68A !important;
+        }
+
+        /* Camera Scanner Modal & Close Button High Contrast in Dark Mode */
+        html.dark #qrScannerModal .bg-white {
+            background-color: #0F172A !important;
+            border-color: #1E293B !important;
+            color: #F8FAFC !important;
+        }
+        html.dark #qrScannerModal button[onclick*="closeQRScannerModal"],
+        html.dark .modal-close-btn {
+            background-color: #1E293B !important;
+            color: #FFFFFF !important;
+            border: 1px solid #334155 !important;
+        }
+        html.dark #qrScannerModal button[onclick*="closeQRScannerModal"]:hover,
+        html.dark .modal-close-btn:hover {
+            background-color: #334155 !important;
+            color: #FFFFFF !important;
+        }
+
+        /* Headlines & Brand: Playfair Display + Noto Serif Tamil (Prestige, Elegance, Authority) */
+        .font-headline {
+            font-family: 'Playfair Display', 'Noto Serif Tamil', Georgia, serif;
+            letter-spacing: -0.02em;
+        }
+
+        /* Tamil Serif */
+        .font-tamil-serif {
+            font-family: 'Noto Serif Tamil', 'Playfair Display', Georgia, serif;
+        }
+
+        /* Modern Display Accent: Montserrat */
+        .font-display {
+            font-family: 'Montserrat', 'Poppins', sans-serif;
+        }
+
+        /* High-Legibility Modern Numbers (Fintech & Rewards Standard) */
+        .font-number {
+            font-family: 'Montserrat', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum";
+            letter-spacing: -0.02em;
+        }
+
+        .tabular-nums { font-variant-numeric: tabular-nums; }
+
+        /* Gentle golden laser line for camera viewfinder */
+        @keyframes scanLaser {
+            0%, 100% { top: 12%; opacity: 0.9; }
+            50% { top: 86%; opacity: 1; }
+        }
+        .laser-line {
+            position: absolute;
+            left: 8%;
+            right: 8%;
+            height: 2px;
+            background: #D97706;
+            box-shadow: 0 0 10px 2px rgba(217, 119, 6, 0.7);
+            animation: scanLaser 2s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        /* Camera viewfinder full-bleed (removes letterbox black bars completely) */
+        #qr-reader {
+            width: 100% !important;
+            height: 100% !important;
+            border: none !important;
+            padding: 0 !important;
+            background: transparent !important;
+        }
+        #qr-reader video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            object-position: center center !important;
+            border-radius: 1rem !important;
+        }
+        #qr-shaded-region {
+            border-width: 0px !important;
+        }
+
+        /* Mobile Tactile Button Clicking & Ripple Effects */
+        button, a, [role="button"], input[type="submit"], input[type="button"], .btn-tap {
+            -webkit-tap-highlight-color: transparent !important;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.08s ease, box-shadow 0.08s ease;
+        }
+
+        button:active, a:active, [role="button"]:active, .btn-tap:active {
+            transform: scale(0.93) translateY(2px) !important;
+            filter: brightness(0.88) !important;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.18) !important;
+        }
+
+        /* Fluid Ripple Wave for Mobile Tap */
+        .mobile-tap-ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.45);
+            transform: scale(0);
+            animation: mobileRippleScale 0.38s ease-out forwards;
+            pointer-events: none;
+            z-index: 99;
+        }
+
+        @keyframes mobileRippleScale {
+            to {
+                transform: scale(3.5);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col pb-28 antialiased overflow-x-hidden selection:bg-[#FDE68A] selection:text-[#0F172A]">
+    <!-- Crisp, Light, Highly Trustworthy Store Header -->
+    <header class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md text-[#0F172A] sticky top-0 z-40 border-b border-[#E2E8F0] dark:border-slate-800 shadow-2xs transition-colors">
+        <div class="max-w-md mx-auto px-2.5 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between gap-1.5 sm:gap-2">
+            <div class="flex items-center gap-2 min-w-0 flex-1">
+                {% if founder_settings.founder_enabled %}
+                <!-- Founder Prestige Medallion (Clean Cameo Gold Frame, Perfectly Centered) -->
+                <button type="button" onclick="openFounderModal()"
+                        class="btn-tap relative shrink-0 cursor-pointer focus:outline-none group rounded-full self-center"
+                        title="Tap to view Founder's Tribute (Nandhini Stationery)"
+                        aria-label="View Founder Tribute">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full p-[2px] bg-gradient-to-tr from-amber-500 via-amber-300 to-amber-600 shadow-xs ring-2 ring-amber-400/25 group-hover:ring-amber-400/50 group-hover:scale-105 group-active:scale-95 transition-all flex items-center justify-center">
+                        <img src="{{ founder_settings.founder_photo_url }}"
+                             alt="Founder - Nandhini Stationery"
+                             class="w-full h-full rounded-full object-cover object-[50%_20%] aspect-square block bg-slate-800 border border-white/60 dark:border-slate-800">
+                    </div>
+                </button>
+                {% else %}
+                <a href="/dashboard/" class="w-8 h-8 rounded-xl bg-[#0F172A] text-[#FBBF24] font-headline text-base flex items-center justify-center font-bold shadow-xs shrink-0 border border-slate-700/50 self-center">
+                    N
+                </a>
+                {% endif %}
+
+                <a href="/dashboard/" class="flex flex-col justify-center min-w-0 flex-1 leading-tight overflow-hidden">
+                    <h1 class="font-headline text-xs sm:text-sm font-bold tracking-tight text-[#0F172A] dark:text-white leading-tight truncate">
+                        Nandhini Stationery
+                    </h1>
+                    <p class="font-tamil-serif text-[9px] sm:text-[11px] text-[#B45309] dark:text-amber-400 font-semibold tracking-normal truncate leading-tight mt-0.5">
+                        நந்தினி ஸ்டேஷனரி • Rewards
+                    </p>
+                </a>
+            </div>
+            <div class="flex items-center gap-1 sm:gap-1.5 shrink-0 ml-auto self-center">
+                <!-- Dark / Light Theme Toggle (Default Light) -->
+                <button id="themeToggleBtn" type="button" onclick="toggleTheme()"
+                        class="btn-tap relative z-50 w-7 h-7 sm:w-8 sm:h-8 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-xs transition shadow-2xs cursor-pointer shrink-0"
+                        title="Toggle Dark / Light Mode" aria-label="Toggle Dark / Light Mode">
+                    <span id="themeToggleIcon">🌙</span>
+                </button>
+                {% if request.session.customer_id %}
+                <button onclick="if(typeof openQRScannerModal === 'function'){ openQRScannerModal(); } else { window.location.href='/dashboard/'; }"
+                        class="btn-tap bg-[#FEF3C7] hover:bg-[#FDE68A] text-[#78350F] font-display text-[10px] sm:text-xs font-bold px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl border border-[#FCD34D] shadow-xs flex items-center gap-1 transition cursor-pointer shrink-0 h-7 sm:h-8"
+                        title="Scan Paper QR Chit">
+                    <span>📷</span>
+                    <span class="hidden xs:inline sm:inline">Scan</span>
+                </button>
+                <a href="/logout/" class="btn-tap font-display text-[10px] sm:text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded-lg transition shrink-0 whitespace-nowrap">
+                    Logout
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!-- FOUNDER TRIBUTE MODAL (Interactive High-Prestige Commemorative Pop-up)     -->
+    <!-- ========================================================================= -->
+    <div id="founderTributeModal"
+         class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-all duration-300"
+         onclick="handleFounderModalBackdrop(event)"
+         role="dialog" aria-modal="true" aria-labelledby="founderModalTitle">
+        <div class="relative bg-white dark:bg-slate-900 border-2 border-amber-400/70 rounded-3xl max-w-sm w-full p-5 sm:p-6 shadow-2xl text-center overflow-hidden transform transition-all">
+            <!-- Ambient Luxury Glow -->
+            <div class="absolute -top-12 -right-12 w-36 h-36 bg-amber-500/15 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="absolute -bottom-12 -left-12 w-36 h-36 bg-purple-500/15 rounded-full blur-2xl pointer-events-none"></div>
+
+            <!-- Close Button -->
+            <button type="button"
+                    onclick="closeFounderModal()"
+                    class="btn-tap absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition border border-slate-200 dark:border-slate-700 cursor-pointer focus:outline-none"
+                    aria-label="Close modal">
+                ✕
+            </button>
+
+            <!-- Founder Portrait in Gold Seal Halo -->
+            <div class="relative mx-auto w-28 h-28 sm:w-32 sm:h-32 mb-3">
+                <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 p-1 shadow-lg shadow-amber-500/25"></div>
+                <img id="founderModalImg"
+                     src="{{ founder_settings.founder_photo_url }}"
+                     alt="Founder Portrait - Nandhini Stationery"
+                     class="relative w-full h-full rounded-full object-cover object-[50%_20%] border-2 border-white dark:border-slate-900 shadow-inner aspect-square block">
+            </div>
+
+            <!-- Founder Pill Badge (Cleanly Centered Below Portrait) -->
+            <div class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 text-xs font-bold mb-2 shadow-2xs">
+                <span>👑</span>
+                <span>Founder & Patriarch</span>
+            </div>
+
+            <!-- Founder Title & Store Brand -->
+            <h3 id="founderModalTitle" class="font-headline text-lg sm:text-xl font-bold text-[#0F172A] dark:text-white leading-tight">
+                {{ founder_settings.founder_title }}
+            </h3>
+            <p class="font-tamil-serif text-xs font-semibold text-[#B45309] dark:text-amber-400 mt-0.5">
+                நந்தினி ஸ்டேஷனரி • Trust & Quality
+            </p>
+
+            <!-- Prestigious Founder Motto Quote -->
+            <div class="my-4 p-3.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-center">
+                <span class="text-amber-500 text-lg leading-none block mb-1">“</span>
+                <p id="founderModalMotto" class="font-sans text-xs sm:text-[13px] font-medium text-amber-950 dark:text-amber-200 leading-relaxed italic">
+                    {{ founder_settings.founder_motto }}
+                </p>
+                <span class="text-amber-500 text-lg leading-none block mt-1">”</span>
+            </div>
+
+            <!-- Verified Store Commitment Badge -->
+            <div class="flex items-center justify-center gap-1.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 py-1.5 px-3 rounded-xl border border-emerald-200 dark:border-emerald-800/60 mb-4">
+                <span>✅</span>
+                <span>Serving Students & Families with 100% Genuine Care</span>
+            </div>
+
+            <!-- Close Action Button -->
+            <button type="button"
+                    onclick="closeFounderModal()"
+                    class="btn-tap w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-display text-xs font-bold transition shadow-md shadow-amber-500/25 active:scale-98 cursor-pointer">
+                Close Tribute
+            </button>
+        </div>
+    </div>
+
+    <main class="flex-grow max-w-md w-full mx-auto px-3.5 sm:px-4 pt-3.5 sm:pt-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-2xl text-xs font-semibold shadow-sm flex items-center gap-3 {% if message.tags == 'error' %}bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]{% else %}bg-[#F0FDF4] text-[#166534] border border-[#BBF7D0]{% endif %}">
+                    <span class="text-base">{% if message.tags == 'error' %}⚠️{% else %}✓{% endif %}</span>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="py-6 text-center text-xs text-slate-500 dark:text-slate-400 font-medium max-w-md w-full mx-auto px-4 space-y-2">
+        <p class="font-headline text-xs font-bold text-[#0F172A] dark:text-white">
+            Nandhini Stationery <span class="font-tamil-serif font-normal text-[#B45309] dark:text-amber-400">(நந்தினி ஸ்டேஷனரி)</span>
+        </p>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400">Pallavaram, Chennai • Rewards Club</p>
+        
+        <!-- Contact Numbers -->
+        <div class="pt-1 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+            <span class="inline-flex items-center gap-1">
+                <span>📞</span>
+                <a href="tel:+918680898105" class="hover:text-amber-600 dark:hover:text-amber-400 tabular-nums transition">+91 8680898105</a>
+            </span>
+            <span class="text-slate-300 dark:text-slate-700">•</span>
+            <span class="inline-flex items-center gap-1">
+                <span>📞</span>
+                <a href="tel:+918678922362" class="hover:text-amber-600 dark:hover:text-amber-400 tabular-nums transition">+91 8678922362</a>
+            </span>
+        </div>
+
+        <!-- Copyright Notice -->
+        <p class="text-[10px] text-slate-400 dark:text-slate-500 pt-1 font-mono tracking-tight">
+            © 2026 MUTHU SELVAM. All rights reserved.
+        </p>
+    </footer>
+    <script>
+    // Universal Mobile Tap / Click Tactile Ripple & Haptic Feedback
+    document.addEventListener('pointerdown', function(e) {
+        const btn = e.target.closest('button, a, [role="button"], input[type="submit"], input[type="button"], .btn-tap');
+        if (!btn) return;
+
+        // 1. Mobile tactile haptic thud (Android & supporting browsers)
+        if (navigator.vibrate) {
+            try { navigator.vibrate(15); } catch (_) {}
+        }
+
+        // 2. Dynamic fluid ripple from tap coordinate
+        try {
+            const rect = btn.getBoundingClientRect();
+            const ripple = document.createElement('span');
+            ripple.className = 'mobile-tap-ripple';
+            const size = Math.max(rect.width, rect.height, 48);
+            ripple.style.width = ripple.style.height = size + 'px';
+            const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : rect.left + rect.width / 2);
+            const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : rect.top + rect.height / 2);
+            ripple.style.left = (clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (clientY - rect.top - size / 2) + 'px';
+
+            const bg = window.getComputedStyle(btn).backgroundColor;
+            if (bg && (bg.includes('255, 255, 255') || bg.includes('254, 243, 199') || bg.includes('241, 245, 249'))) {
+                ripple.style.background = 'rgba(15, 23, 42, 0.12)';
+            }
+            btn.appendChild(ripple);
+            setTimeout(() => { ripple.remove(); }, 400);
+        } catch (_) {}
+    }, { passive: true });
+
+    // Theme Toggle Logic (Default Light, Saves to localStorage)
+    function toggleTheme() {
+        var isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('nandhini_customer_theme', isDark ? 'dark' : 'light');
+        updateThemeIcons(isDark);
+        window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: isDark } }));
+    }
+    function updateThemeIcons(isDark) {
+        var icon = document.getElementById('themeToggleIcon');
+        if (icon) {
+            icon.textContent = isDark ? '☀️' : '🌙';
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var isDark = document.documentElement.classList.contains('dark');
+        updateThemeIcons(isDark);
+    });
+
+    // Founder Tribute Modal Controller
+    function openFounderModal() {
+        const modal = document.getElementById('founderTributeModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    function closeFounderModal() {
+        const modal = document.getElementById('founderTributeModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    }
+    function handleFounderModalBackdrop(event) {
+        if (event.target.id === 'founderTributeModal') {
+            closeFounderModal();
+        }
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeFounderModal();
+        }
+    });
+    </script>
+</body>
+</html>
