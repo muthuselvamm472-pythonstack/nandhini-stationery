@@ -15,7 +15,7 @@ db.sqlite3
 backups/
 
 # Static Collection & User Uploads
-staticfiles/
+# staticfiles/ committed for Vercel WhiteNoise deployment
 .user_uploaded/
 
 # Python Cache & Bytecode
