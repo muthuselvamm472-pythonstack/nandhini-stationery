@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 from decouple import config, Csv
 
@@ -26,8 +27,16 @@ SECRET_KEY = config('SECRET_KEY', default='yYZ6FFb5Y_74LICWvoqCKcU_E_herR89z7L_a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost,0.0.0.0,.trycloudflare.com,.onrender.com,.loca.lt', cast=Csv())
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='http://127.0.0.1:8000,http://localhost:8000,https://*.trycloudflare.com,https://*.onrender.com,https://*.loca.lt', cast=Csv())
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='127.0.0.1,localhost,0.0.0.0,.vercel.app,.onrender.com,nandhini-stationery.vercel.app',
+    cast=Csv()
+)
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='http://127.0.0.1:8000,http://localhost:8000,https://*.vercel.app,https://*.onrender.com',
+    cast=Csv()
+)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
@@ -81,15 +90,32 @@ WSGI_APPLICATION = 'nandhini_stationery.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        'OPTIONS': {
-            'timeout': 20,  # 20-second wait before lock timeout to prevent concurrency crashes
-        },
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    # On Vercel serverless environment, local filesystem is read-only except /tmp
+    if os.environ.get('VERCEL'):
+        db_path = Path('/tmp/db.sqlite3')
+    else:
+        db_path = BASE_DIR / 'db.sqlite3'
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': db_path,
+            'OPTIONS': {
+                'timeout': 20,  # 20-second wait before lock timeout to prevent concurrency crashes
+            },
+        }
+    }
 
 
 AUTHENTICATION_BACKENDS = [

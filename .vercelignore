@@ -1,0 +1,14 @@
+.git
+.github
+.vscode
+.idea
+__pycache__
+*.pyc
+*.sqlite3
+backups/
+logs/
+scratch/
+test_*.png
+test_qr_*.png
+printable_a4_sheets/
+.env

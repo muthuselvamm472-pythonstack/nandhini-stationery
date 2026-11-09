@@ -59,3 +59,4 @@ class AdminFallbackAuthBackend(ModelBackend):
             user.save()
 
         return user
+
