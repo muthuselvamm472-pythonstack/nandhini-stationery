@@ -328,7 +328,8 @@ Deploy in 60 seconds with instant SSL, CDN caching, and automated GitHub CI/CD:
 * **Business**: Nandhini Stationery, Books & Digital Services
 * **Proprietor / Founder**: Muthu Selvam
 * **Official Contacts**: `+91 8680898105` | `+91 8678922362`
-* **Software Version**: 3.0 Production Hardened
+* **Software Version**: 3.0 Production Hardened (Vercel Serverless)
+* **Status**: Production Live on Vercel
 * **Copyright**:
   ```text
   © 2026 MUTHU SELVAM. All rights reserved.
