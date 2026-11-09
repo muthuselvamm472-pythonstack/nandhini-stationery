@@ -24,3 +24,4 @@ except Exception as e:
 
 echo "==> Starting Gunicorn application server..."
 exec gunicorn nandhini_stationery.wsgi:application --bind 0.0.0.0:${PORT:-8000}
+
