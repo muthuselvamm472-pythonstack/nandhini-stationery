@@ -9,6 +9,7 @@
 # SQLite Databases, WAL Files & Backups
 db.sqlite3
 *.sqlite3
+!db_seed.sqlite3
 *.sqlite3-journal
 *.sqlite3-wal
 *.sqlite3-shm

@@ -103,7 +103,15 @@ if DATABASE_URL:
 else:
     # On Vercel serverless environment, local filesystem is read-only except /tmp
     if os.environ.get('VERCEL'):
-        db_path = Path('/tmp/db.sqlite3')
+        tmp_db = Path('/tmp/db.sqlite3')
+        seed_db = BASE_DIR / 'db_seed.sqlite3'
+        if not tmp_db.exists() and seed_db.exists():
+            import shutil
+            try:
+                shutil.copy2(seed_db, tmp_db)
+            except Exception:
+                pass
+        db_path = tmp_db
     else:
         db_path = BASE_DIR / 'db.sqlite3'
 
