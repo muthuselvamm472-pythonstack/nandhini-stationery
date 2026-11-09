@@ -216,45 +216,81 @@ CACHES = {
     }
 }
 
-# Production Rotating Audit Logging (Intrusion & Rate Limit Recording)
-LOGS_DIR = BASE_DIR / 'logs'
-LOGS_DIR.mkdir(exist_ok=True)
+# Production Logging (Console stream on Vercel, Rotating File Handler locally)
+IS_VERCEL = bool(os.environ.get('VERCEL'))
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '[{asctime}] {levelname} [{name}] {message}',
-            'style': '{',
+if IS_VERCEL:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'verbose': {
+                'format': '[{asctime}] {levelname} [{name}] {message}',
+                'style': '{',
+            },
         },
-    },
-    'handlers': {
-        'security_file': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGS_DIR / 'security.log',
-            'maxBytes': 5 * 1024 * 1024,  # 5 MB per log file
-            'backupCount': 5,
-            'formatter': 'verbose',
-            'encoding': 'utf-8',
+        'handlers': {
+            'console': {
+                'level': 'INFO',
+                'class': 'logging.StreamHandler',
+                'formatter': 'verbose',
+            },
         },
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+        'loggers': {
+            'rewards.security': {
+                'handlers': ['console'],
+                'level': 'WARNING',
+                'propagate': True,
+            },
+            'django.security': {
+                'handlers': ['console'],
+                'level': 'WARNING',
+                'propagate': True,
+            },
         },
-    },
-    'loggers': {
-        'rewards.security': {
-            'handlers': ['security_file', 'console'],
-            'level': 'WARNING',
-            'propagate': True,
+    }
+else:
+    LOGS_DIR = BASE_DIR / 'logs'
+    try:
+        LOGS_DIR.mkdir(exist_ok=True)
+    except Exception:
+        pass
+
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'verbose': {
+                'format': '[{asctime}] {levelname} [{name}] {message}',
+                'style': '{',
+            },
         },
-        'django.security': {
-            'handlers': ['security_file', 'console'],
-            'level': 'WARNING',
-            'propagate': False,
+        'handlers': {
+            'security_file': {
+                'level': 'WARNING',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': LOGS_DIR / 'security.log',
+                'maxBytes': 5 * 1024 * 1024,  # 5 MB per log file
+                'backupCount': 5,
+                'formatter': 'verbose',
+                'encoding': 'utf-8',
+            },
+            'console': {
+                'level': 'INFO',
+                'class': 'logging.StreamHandler',
+                'formatter': 'verbose',
+            },
         },
-    },
-}
+        'loggers': {
+            'rewards.security': {
+                'handlers': ['security_file', 'console'],
+                'level': 'WARNING',
+                'propagate': True,
+            },
+            'django.security': {
+                'handlers': ['security_file', 'console'],
+                'level': 'WARNING',
+                'propagate': True,
+            },
+        },
+    }

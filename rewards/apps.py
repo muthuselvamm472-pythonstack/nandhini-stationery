@@ -4,6 +4,10 @@ from django.db.models.signals import post_migrate
 
 
 def configure_sqlite_wal(sender, connection, **kwargs):
+    import os
+    if os.environ.get('VERCEL'):
+        # On Vercel Lambda /tmp, stay with default journal mode to prevent -shm mmap lock crashes
+        return
     if connection.vendor == 'sqlite':
         try:
             cursor = connection.cursor()
