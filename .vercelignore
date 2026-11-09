@@ -5,6 +5,7 @@
 __pycache__
 *.pyc
 *.sqlite3
+!db_seed.sqlite3
 backups/
 logs/
 scratch/

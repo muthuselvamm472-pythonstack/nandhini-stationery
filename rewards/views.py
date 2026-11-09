@@ -331,7 +331,25 @@ def check_phone_api(request):
     return JsonResponse({'exists': False, 'error': 'Invalid mobile number'})
 
 
+_db_checked = False
+
+
+def ensure_database_ready():
+    global _db_checked
+    if not _db_checked:
+        try:
+            from django.db import connection
+            tables = connection.introspection.table_names()
+            if 'rewards_customer' not in tables:
+                from django.core.management import call_command
+                call_command('migrate', interactive=False)
+            _db_checked = True
+        except Exception as e:
+            logger.warning(f"ensure_database_ready notice: {e}")
+
+
 def customer_login(request):
+    ensure_database_ready()
     raw_next = request.GET.get('next', '/dashboard/')
     next_url = raw_next if url_has_allowed_host_and_scheme(raw_next, allowed_hosts={request.get_host()}) else '/dashboard/'
 
@@ -1717,9 +1735,11 @@ def custom_page_not_found_view(request, exception=None):
 
 
 def custom_server_error_view(request):
+    import traceback
+    logger.error(f"500 Internal Error at {getattr(request, 'path', '?')}:\n{traceback.format_exc()}")
     return render(request, 'rewards/error.html', {
-        'title': 'High Store Foot-Traffic',
-        'message': 'Our system is handling heavy customer activity. Please wait a moment and tap retry.',
+        'title': 'Something Went Wrong',
+        'message': 'We experienced a temporary glitch. Please refresh or try again.',
         'code': '500'
     }, status=500)
 

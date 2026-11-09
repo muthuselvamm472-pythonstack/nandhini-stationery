@@ -105,7 +105,7 @@ else:
     if os.environ.get('VERCEL'):
         tmp_db = Path('/tmp/db.sqlite3')
         seed_db = BASE_DIR / 'db_seed.sqlite3'
-        if not tmp_db.exists() and seed_db.exists():
+        if seed_db.exists() and (not tmp_db.exists() or tmp_db.stat().st_size < 10000):
             import shutil
             try:
                 shutil.copy2(seed_db, tmp_db)

@@ -36,10 +36,6 @@
     <form id="loginForm" method="POST" action="/login/" novalidate class="space-y-4">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ next }}">
-        <!-- Anti-Bot Honeypot Field (Invisible to Humans) -->
-        <div style="display:none !important; visibility:hidden !important; position:absolute; left:-9999px;" aria-hidden="true">
-            <input type="text" name="website_trap_val" tabindex="-1" autocomplete="off">
-        </div>
 
         <div>
             <label class="block font-display text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
