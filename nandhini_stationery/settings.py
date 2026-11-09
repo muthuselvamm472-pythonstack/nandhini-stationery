@@ -29,12 +29,12 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
-    default='127.0.0.1,localhost,0.0.0.0,.vercel.app,.onrender.com,nandhini-stationery.vercel.app',
+    default='127.0.0.1,localhost,0.0.0.0,.vercel.app,nandhini-stationery.vercel.app',
     cast=Csv()
 )
 CSRF_TRUSTED_ORIGINS = config(
     'CSRF_TRUSTED_ORIGINS',
-    default='http://127.0.0.1:8000,http://localhost:8000,https://*.vercel.app,https://*.onrender.com',
+    default='http://127.0.0.1:8000,http://localhost:8000,https://*.vercel.app,https://nandhini-stationery.vercel.app',
     cast=Csv()
 )
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

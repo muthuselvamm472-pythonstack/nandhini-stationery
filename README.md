@@ -219,7 +219,7 @@ sequenceDiagram
                             │ HTTPS / WSS
 ┌───────────────────────────▼────────────────────────────┐
 │                  REVERSE PROXY / CDN                   │
-│   Cloudflare Tunnel (WAF, Bot Fight Mode, DDoS Shield) │
+│   Vercel Edge Network (Global CDN, SSL, DDoS Shield)   │
 └───────────────────────────┬────────────────────────────┘
                             │ WSGI
 ┌───────────────────────────▼────────────────────────────┐
@@ -309,33 +309,17 @@ python serve_production.py
 
 ---
 
-## ☁️ 100% Free Production Deployment
+## ☁️ 100% Free Production Deployment (Vercel)
 
-### Option A: Cloudflare Tunnel (Recommended for Retail Stores)
-Run directly from your shop PC with zero hosting costs, full data persistence, and Cloudflare enterprise DDoS protection:
+Deploy in 60 seconds with instant SSL, CDN caching, and automated GitHub CI/CD:
 
-```powershell
-# 1. Install Cloudflare CLI
-winget install --id Cloudflare.cloudflared
-
-# 2. Authenticate
-cloudflared tunnel login
-
-# 3. Create Tunnel & Route Domain
-cloudflared tunnel create nandhini-stationery
-cloudflared tunnel route dns nandhini-stationery yourdomain.com
-
-# 4. Start Tunnel
-cloudflared tunnel run --url http://127.0.0.1:8000 nandhini-stationery
-```
-
-### Option B: Render.com Cloud Web Service (24/7 Cloud)
-1. Go to [Render.com](https://render.com) and click **New Web Service**.
-2. Connect your GitHub repository: `muthuselvamm472-pythonstack/nandhini-stationery`.
-3. Set **Build Command**: `./build.sh`
-4. Set **Start Command**: `gunicorn nandhini_stationery.wsgi:application`
-5. Add your environment variables (`SECRET_KEY`, `DEBUG=False`).
-6. Click **Deploy** to receive your free public HTTPS link!
+1. Go to [Vercel](https://vercel.com) and sign in with GitHub.
+2. Click **Add New...** → **Project** and import `muthuselvamm472-pythonstack/nandhini-stationery`.
+3. Set **Project Name**: `nandhini-stationery`.
+4. Add Environment Variables:
+   * `SECRET_KEY`: Your Django production secret key
+   * `DEBUG`: `False`
+5. Click **Deploy** to launch on `https://nandhini-stationery.vercel.app`!
 
 ---
 

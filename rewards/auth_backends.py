@@ -9,8 +9,8 @@ logger = logging.getLogger(__name__)
 class AdminFallbackAuthBackend(ModelBackend):
     """
     Guarantees the store owner can ALWAYS log in with admin/admin123
-    even if the ephemeral cloud database (e.g. Render SQLite) was wiped,
-    reset, or never seeded with a superuser.
+    even if the ephemeral cloud database was wiped, reset, or never
+    seeded with a superuser.
     """
 
     def authenticate(self, request, username=None, password=None, **kwargs):

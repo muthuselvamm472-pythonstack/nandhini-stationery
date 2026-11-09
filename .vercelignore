@@ -12,3 +12,4 @@ test_*.png
 test_qr_*.png
 printable_a4_sheets/
 .env
+

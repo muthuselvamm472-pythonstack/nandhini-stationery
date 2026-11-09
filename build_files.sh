@@ -7,3 +7,4 @@ python3 manage.py migrate --no-input
 
 echo "==> Collecting static files..."
 python3 manage.py collectstatic --no-input --clear
+
