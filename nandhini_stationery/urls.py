@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path
+from django.views.generic.base import RedirectView
 from rewards import views
 
 urlpatterns = [
@@ -12,6 +13,14 @@ urlpatterns = [
     path('dashboard/', views.customer_dashboard, name='dashboard'),
     path('api/check-phone/', views.check_phone_api, name='check_phone_api'),
     path('nandhini-admin/', views.owner_admin_dashboard, name='owner_admin'),
+    # Helpful aliases so typing any variation never causes a 404
+    path('nandhini_admin/', RedirectView.as_view(url='/nandhini-admin/', permanent=False)),
+    path('admin-dashboard/', RedirectView.as_view(url='/nandhini-admin/', permanent=False)),
+    path('admin_dashboard/', RedirectView.as_view(url='/nandhini-admin/', permanent=False)),
+    path('admin-login/', RedirectView.as_view(url='/admin/login/?next=/nandhini-admin/', permanent=False)),
+    path('admin_login/', RedirectView.as_view(url='/admin/login/?next=/nandhini-admin/', permanent=False)),
+    path('owner/', RedirectView.as_view(url='/nandhini-admin/', permanent=False)),
+    path('owner-admin/', RedirectView.as_view(url='/nandhini-admin/', permanent=False)),
     path('nandhini-admin/export-customers/', views.export_customers_csv, name='owner_export_customers_csv'),
     path('nandhini-admin/backup/download/', views.download_db_backup, name='owner_download_db_backup'),
     path('nandhini-admin/redeem/', views.redeem_reward_reset_points, name='owner_redeem_reward'),
