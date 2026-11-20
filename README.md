@@ -6,7 +6,7 @@
 
 > 🌐 **Live Website:** [https://nandhini-stationery.vercel.app](https://nandhini-stationery.vercel.app)  
 > 🔐 **Store Admin Portal:** [https://nandhini-stationery.vercel.app/nandhini-admin/](https://nandhini-stationery.vercel.app/nandhini-admin/)  
-> 🔑 **Admin Credentials:** Username: `admin` | Password: `admin123`
+> 🛡️ **Access:** Administrative panel is secured. Demo evaluation credentials available upon request.
 
 ---
 
@@ -324,9 +324,7 @@ python serve_production.py
 The application is deployed and live on Vercel Serverless with automated SSL, global edge CDN, and continuous GitHub CI/CD:
 
 * 🏠 **Live Customer Website**: [https://nandhini-stationery.vercel.app](https://nandhini-stationery.vercel.app)
-* 🔐 **Store Owner & Admin Portal**: [https://nandhini-stationery.vercel.app/nandhini-admin/](https://nandhini-stationery.vercel.app/nandhini-admin/)
-  * **Admin Username**: `admin`
-  * **Admin Password**: `admin123`
+* 🔐 **Store Owner & Admin Portal**: [https://nandhini-stationery.vercel.app/nandhini-admin/](https://nandhini-stationery.vercel.app/nandhini-admin/) (Protected route — evaluation access provided upon recruiter/client request)
 
 ### Deploying Your Own Instance:
 1. Go to [Vercel](https://vercel.com) and sign in with GitHub.
