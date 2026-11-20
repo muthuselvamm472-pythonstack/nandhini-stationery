@@ -1,5 +1,15 @@
 # 📚 Nandhini Stationery — Smart Loyalty, Rewards & Digital Member Pass Platform
 
+[![Live Production](https://img.shields.io/badge/Live_Site-Vercel-success?style=for-the-badge&logo=vercel)](https://nandhini-stationery.vercel.app)
+[![Admin Portal](https://img.shields.io/badge/Admin_Portal-Live-blue?style=for-the-badge&logo=django)](https://nandhini-stationery.vercel.app/nandhini-admin/)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github)](https://github.com/muthuselvamm472-pythonstack/nandhini-stationery)
+
+> 🌐 **Live Website:** [https://nandhini-stationery.vercel.app](https://nandhini-stationery.vercel.app)  
+> 🔐 **Store Admin Portal:** [https://nandhini-stationery.vercel.app/nandhini-admin/](https://nandhini-stationery.vercel.app/nandhini-admin/)  
+> 🔑 **Admin Credentials:** Username: `admin` | Password: `admin123`
+
+---
+
 > A high-concurrency, enterprise-hardened retail loyalty and rewards platform engineered for stationery, bookstore, and retail merchants. Bridges the gap between physical retail purchases and high-retention digital customer loyalty without third-party fees, app downloads, or complex hardware.
 
 ---
@@ -311,8 +321,14 @@ python serve_production.py
 
 ## ☁️ 100% Free Production Deployment (Vercel)
 
-Deploy in 60 seconds with instant SSL, CDN caching, and automated GitHub CI/CD:
+The application is deployed and live on Vercel Serverless with automated SSL, global edge CDN, and continuous GitHub CI/CD:
 
+* 🏠 **Live Customer Website**: [https://nandhini-stationery.vercel.app](https://nandhini-stationery.vercel.app)
+* 🔐 **Store Owner & Admin Portal**: [https://nandhini-stationery.vercel.app/nandhini-admin/](https://nandhini-stationery.vercel.app/nandhini-admin/)
+  * **Admin Username**: `admin`
+  * **Admin Password**: `admin123`
+
+### Deploying Your Own Instance:
 1. Go to [Vercel](https://vercel.com) and sign in with GitHub.
 2. Click **Add New...** → **Project** and import `muthuselvamm472-pythonstack/nandhini-stationery`.
 3. Set **Project Name**: `nandhini-stationery`.
